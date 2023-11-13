@@ -135,5 +135,5 @@ p$socdem
 ### Mental health and other factors
 
 ```{r, fig.width=3, fig.height=4, dpi=300, echo=FALSE, message=FALSE, results='asis'}
-p$mhoth
+p$mh_oth
 ```

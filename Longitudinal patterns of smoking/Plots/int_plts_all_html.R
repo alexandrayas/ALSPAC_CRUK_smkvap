@@ -17,17 +17,12 @@ ref_cl <- split(allests$ref_cl, allests$comparison)
 ests <- lapply(1:10, function(x){cbind(ests[[x]], comp_cl = comp_cl[[x]], ref_cl = ref_cl[[x]])})
 names(ests) <- levels(allests$comparison)
 
-ests <- lapply(ests, function(x){cbind(x,text = paste("Risk factor: ", x$long_labs, "\nUnexposed label: ", x$labs_unexp, "\nExposed label: ", x$labs_exp, "\nSample size: ", x$n, 
-                                                      "\nN Unexposed: ", x$n_unexp, "\nN Exposed: ", x$n_exp, "\nOR: ", x$OR, "\nLCI: ", x$LCI, "\nUCI: ", x$UCI, "\nPAF: ", x$PAF, "\n% exposed: ", x$prop_exp, 
-                                                      "\nCI does not overlap null: ", x$sig, "\nSmall latent cell counts: ", x$low_cell, "\nReference: ", x$ref_cl, "\nComparison: ", x$comp_cl, sep=""))})
+ests <- lapply(ests, function(x){cbind(x,text = paste("Risk factor: ", x$long_labs, "\nUnexposed label: ", x$labs_unexp, "\nExposed label: ", x$labs_exp, 
+                                                      "\nReference: ", x$ref_cl, "\nComparison: ", x$comp_cl,
+                                                      "\nSample size: ", x$n, "\nN Unexposed: ", x$n_unexp, "\nN Exposed: ", x$n_exp, 
+                                                      "\nOR: ", x$OR, "\nLCI: ", x$LCI, "\nUCI: ", x$UCI, "\nPAF: ", x$PAF, "\n% exposed: ", x$prop_exp, 
+                                                      "\nCI does not overlap null: ", x$sig, "\nSmall latent cell counts: ", x$low_cell, sep=""))})
 allests$text <- do.call('rbind',ests)$text
-
-
-
-#!DELETE BELOW ONCE LABELS SCRIPT CHANGED!
-allests$sub_grp[allests$grp %in% c('m_urbrur','m_townsend','m_IMD')] <- 'Maternal neighbourhood deprivation'
-allests$sub_grp[allests$grp %in% c('m_cotinine')] <- 'Maternal cotinine in pregnancy'
-allests$sub_grp[allests$grp %in% c('friends_smk')] <- 'Peer smoking'
 
 
 
@@ -93,11 +88,11 @@ explt_int_grp <- function(df){
     labs(x = '', y = "log(Odds ratio)", colour = 'Category', pch = 'Comparison')
 }
 
-p$fam_peer_smk <- explt_int_grp(df = allests[allests$sub_grp %in% c('Familial smoking','Maternal cotinine in pregnancy','Peer smoking') & !allests$labs %in% exclude,])
-p$fam_peer_sub <- explt_int_grp(df = allests[allests$sub_grp %in% c('Familial substance use','Peer substance use') & !allests$labs %in% exclude,])
-p$fam_socdem <- explt_int_grp(df = allests[allests$sub_grp %in% c('Familial education','Parental SEP','Maternal neighbourhood deprivation') & !allests$labs %in% exclude,])
-p$lifestyle <- explt_int_grp(df = allests[allests$sub_grp %in% c('Other substance use','BMI and Diet','Physical activity and Sleep') & !allests$labs %in% exclude,])
-p$socdem <- explt_int_grp(df = allests[allests$sub_grp %in% c('Sex and Ethnicity','Education','Employment','Neighbourhood deprivation') & !allests$labs %in% exclude,])
-p$mhoth <- explt_int_grp(df = allests[allests$sub_grp %in% c('Familial mental health','Mental health and wellbeing','ACEs and Trauma','Pregnancy and parenthood') & !allests$labs %in% exclude,])
+p$fam_peer_smk <- explt_int_grp(df = allests[allests$lab_grp %in% 'Family and peer smoking' & !allests$labs %in% exclude,])
+p$fam_peer_sub <- explt_int_grp(df = allests[allests$lab_grp %in% 'Family and peer substance use' & !allests$labs %in% exclude,])
+p$fam_socdem <- explt_int_grp(df = allests[allests$lab_grp %in% 'Family sociodemographic factors' & !allests$labs %in% exclude,])
+p$lifestyle <- explt_int_grp(df = allests[allests$lab_grp %in% 'Individual lifestyle factors' & !allests$labs %in% exclude,])
+p$socdem <- explt_int_grp(df = allests[allests$lab_grp %in% 'Individual sociodemographic factors' & !allests$labs %in% exclude,])
+p$mh_oth <- explt_int_grp(df = allests[allests$lab_grp %in% 'Mental health and other factors' & !allests$labs %in% exclude,])
 p <- lapply(p, ggplotly, tooltip="text")
 save(p, file='C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Longitudinal smoking/Figures/int_plts_all.rda')
