@@ -1,0 +1,139 @@
+---
+title: "Longitudinal patterns of smoking behaviours in adolescence and early adulthood and their association with modifiable and sociodemographic risk factors - Interactive plots"
+author: "Andrayas et al"
+date: "2023"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r load-packages, include=FALSE}
+library(htmlwidgets)
+library(ggplot2)
+library(plotly)
+```
+
+```{r, echo=FALSE, message=FALSE}
+source('C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Longitudinal smoking/Scripts/int_plts_all_html.R')
+load("C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Longitudinal smoking/Figures/int_plts_all.Rda")
+```
+
+## Comparison  
+<br>
+
+### Non-smoking vs
+<br>
+
+#### Early-onset smoking
+
+```{r, fig.width=3, fig.height=2, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$C2VC1
+```
+
+#### Late-onset smoking
+
+```{r, fig.width=3, fig.height=2, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$C5VC1
+```
+
+#### Short-term smoking
+
+```{r, fig.width=3, fig.height=2, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$C3VC1
+```
+
+#### Occasional smoking
+
+```{r, fig.width=3, fig.height=2, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$C4VC1
+```
+
+### Occasional smoking vs
+<br>
+
+#### Early-onset smoking
+
+```{r, fig.width=3, fig.height=2, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$C2VC4
+```
+
+#### Late-onset smoking
+
+```{r, fig.width=3, fig.height=2, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$C5VC4
+```
+
+#### Short-term smoking
+
+```{r, fig.width=3, fig.height=2, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$C3VC4
+```
+
+### Short-term smoking vs
+<br>
+
+#### Early-onset smoking
+
+```{r, fig.width=3, fig.height=2, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$C2VC3
+```
+
+#### Late-onset smoking
+
+```{r, fig.width=3, fig.height=2, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$C5VC3
+```
+
+### Late-onset smoking vs
+<br>
+
+#### Early-onset smoking
+
+```{r, fig.width=3, fig.height=2, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$C2VC5
+```
+
+## Theme
+<br>
+
+### Family and peer smoking
+
+```{r, fig.width=3, fig.height=4, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$fam_peer_smk
+```
+
+### Family and peer substance use
+
+```{r, fig.width=3, fig.height=4, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$fam_peer_sub
+```
+
+### Family sociodemographic factors
+
+```{r, fig.width=3, fig.height=4, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$fam_socdem
+```
+
+### Individual lifestyle factors
+
+```{r, fig.width=3, fig.height=4, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$lifestyle
+```
+
+### Individual sociodemographic factors
+
+```{r, fig.width=3, fig.height=4, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$socdem
+```
+
+### Mental health and other factors
+
+```{r, fig.width=3, fig.height=4, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$mhoth
+```
