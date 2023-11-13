@@ -1,0 +1,148 @@
+---
+title: "Circle plots"
+author: "Alexandria Andrayas"
+date: "13/09/2023"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+```{r setup, include=F}
+knitr::opts_chunk$set(echo = TRUE, tidy=T)
+```
+
+```{r, echo=FALSE, message=FALSE}
+source('C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Longitudinal smoking/Scripts/circ_plts_html.R')
+```
+
+## Non-smoking vs any smoking
+    
+### Family substance use
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Familial substance use'),], c(1:4))
+```
+
+### Family sociodemographics   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Familial sociodemographics'),], c(1:4))
+```
+
+### Sociodemographic factors   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Sociodemographic factors'),], c(1:4))
+```
+
+### Lifestyle factors   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Lifestyle factors'),], c(1:4))
+```
+
+### Mental health and other factors
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Mental health and other factors'),], c(1:4))
+```
+
+
+## Occasional smoking vs any regular smoking
+
+### Family substance use
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Familial substance use'),], c(5:7))
+```
+
+### Family sociodemographics   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Familial sociodemographics'),], c(5:7))
+```
+
+### Sociodemographic factors   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Sociodemographic factors'),], c(5:7))
+```
+
+### Lifestyle factors   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Lifestyle factors'),], c(5:7))
+```
+
+### Mental health and other factors
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Mental health and other factors'),], c(5:7))
+```
+
+## Short-term smoking vs more persistent smoking
+
+### Family substance use
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Familial substance use'),], c(8:9))
+```
+
+### Family sociodemographics   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Familial sociodemographics'),], c(8:9))
+```
+
+### Sociodemographic factors   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Sociodemographic factors'),], c(8:9))
+```
+
+### Lifestyle factors   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Lifestyle factors'),], c(8:9))
+```
+
+### Mental health and other factors
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Mental health and other factors'),], c(8:9))
+```
+
+## Late vs early-onset smoking  
+
+### Family substance use
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Familial substance use'),], 10)
+```
+
+### Family sociodemographics   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Familial sociodemographics'),], 10)
+```
+
+### Sociodemographic factors   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Sociodemographic factors'),], 10)
+```
+
+### Lifestyle factors   
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Lifestyle factors'),], 10)
+```
+
+### Mental health and other factors
+
+```{r, out.width="100%", out.height="100%", dpi=300, echo=FALSE, message=FALSE, results='asis'}
+circlplt(allests[allests$lab_grp %in% c('Mental health and other factors'),], 10)
+```

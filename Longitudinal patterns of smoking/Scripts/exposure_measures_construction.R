@@ -128,9 +128,9 @@ expdf$p_smk_11 <- ifelse(exp$r6040 %in% 2, 2, expdf$p_smk_11)
 expdf$p_smk_11 <- factor(expdf$p_smk_11, levels=c(2:1), labels=c('No','Yes')) #live-in husband
 
 #Partner smokes daily
-expdf$p_dailsmk_l2m_gest <- ifelse(exp$e185 %in% c(1,5,10,15,20,25,30), 1, NA)
-expdf$p_dailsmk_l2m_gest <- ifelse(is.na(expdf$p_dailsmk_l2m_gest) & exp$e185 %in% 0, 2, expdf$p_dailsmk_l2m_gest)
-expdf$p_dailsmk_l2m_gest <- factor(expdf$p_dailsmk_l2m_gest, levels=c(2:1), labels=c('No','Yes'))
+expdf$p_dailsmk_l2m_8w <- ifelse(exp$e185 %in% c(1,5,10,15,20,25,30), 1, NA)
+expdf$p_dailsmk_l2m_8w <- ifelse(is.na(expdf$p_dailsmk_l2m_8w) & exp$e185 %in% 0, 2, expdf$p_dailsmk_l2m_8w)
+expdf$p_dailsmk_l2m_8w <- factor(expdf$p_dailsmk_l2m_8w, levels=c(2:1), labels=c('No','Yes'))
 
 expdf$p_dailsmk_8w <- ifelse(exp$e186 %in% c(1,5,10,15,20,25,30), 1, NA)
 expdf$p_dailsmk_8w <- ifelse(is.na(expdf$p_dailsmk_8w) & exp$e186 %in% 0, 2, expdf$p_dailsmk_8w)
@@ -227,6 +227,7 @@ expdf$hh_smk_8 <- factor(exp$n5060, levels=c(2:1), labels=c('No','Yes')) #(other
 expdf$hh_smk_10 <- ifelse(exp$q3031 > 0, 1, NA)
 expdf$hh_smk_10 <- ifelse(exp$q3031 %in% 0, 2, expdf$hh_smk_10)
 expdf$hh_smk_10 <- factor(expdf$hh_smk_10, levels=c(2:1), labels=c('No','Yes')) #(number of smokers in household)
+
 expdf$hh_smk_11 <- factor(exp$r6060, levels=c(2:1), labels=c('No','Yes')) #(apart from respondent/husband/partner, other member of household smokes)
 
 
@@ -369,33 +370,33 @@ expdf$m_l2m_pregdrug_8w <- factor(exp$e203, levels=c(2:1), labels=c('No','Yes'))
 #Mother other drugs
 expdf$m_drug_8w <- factor(exp$e213, levels=c(2:1), labels=c('No','Yes')) #(derived drugs since birth e205-e212)
 
-expdf$m_drug_2 <- ifelse(exp$g048 %in% c(1:3) | exp$g053 %in% c(1:3) | exp$g056 %in% c(1:3), 1, NA)
-expdf$m_drug_2 <- ifelse(is.na(expdf$m_drug_2) & (exp$g048 %in% 4 | exp$g053 %in% 4 | exp$g056 %in% 4), 2, expdf$m_drug_2)
-expdf$m_drug_2 <- factor(expdf$m_drug_2, levels=c(2:1), labels=c('No','Yes')) #(since child 8 months old)
+expdf$m_drug_2 <- ifelse(exp$g053 %in% c(1:3) | exp$g056 %in% c(1:3), 1, NA)
+expdf$m_drug_2 <- ifelse(is.na(expdf$m_drug_2) & (exp$g053 %in% 4 | exp$g056 %in% 4), 2, expdf$m_drug_2)
+expdf$m_drug_2 <- factor(expdf$m_drug_2, levels=c(2:1), labels=c('No','Yes')) #(g053 = amphetamines, g056 = heroin meth cocaine, since child 8 months old used )
 
-expdf$m_drug_3 <- ifelse(exp$h038 %in% c(1:3) | exp$h043 %in% c(1:3) | exp$h046 %in% c(1:3), 1, NA)
-expdf$m_drug_3 <- ifelse(is.na(expdf$m_drug_3) & (exp$h038 %in% 4 | exp$h043 %in% 4 | exp$h046 %in% 4), 2, expdf$m_drug_3)
-expdf$m_drug_3 <- factor(expdf$m_drug_3, levels=c(2:1), labels=c('No','Yes')) #(since child 18 months old)
+expdf$m_drug_3 <- ifelse(exp$h043 %in% c(1:3) | exp$h046 %in% c(1:3), 1, NA)
+expdf$m_drug_3 <- ifelse(is.na(expdf$m_drug_3) & (exp$h043 %in% 4 | exp$h046 %in% 4), 2, expdf$m_drug_3)
+expdf$m_drug_3 <- factor(expdf$m_drug_3, levels=c(2:1), labels=c('No','Yes')) #(h043 = amphetamines, h046 = herion, methadone, crack or cocaine, since child 18 months old)
 
-expdf$m_drug_4 <- ifelse(exp$j043 %in% c(1:3) | exp$j048 %in% c(1:3) | exp$j051 %in% c(1:3), 1, NA)
-expdf$m_drug_4 <- ifelse(is.na(expdf$m_drug_4) & (exp$j043 %in% 4 | exp$j048 %in% 4 | exp$j051 %in% 4), 2, expdf$m_drug_4)
-expdf$m_drug_4 <- factor(expdf$m_drug_4, levels=c(2:1), labels=c('No','Yes')) #(past year)
+expdf$m_drug_4 <- ifelse(exp$j048 %in% c(1:3) | exp$j051 %in% c(1:3), 1, NA)
+expdf$m_drug_4 <- ifelse(is.na(expdf$m_drug_4) & (exp$j048 %in% 4 | exp$j051 %in% 4), 2, expdf$m_drug_4)
+expdf$m_drug_4 <- factor(expdf$m_drug_4, levels=c(2:1), labels=c('No','Yes')) #(j048 = amphetamines, j051 = herion, past year)
 
-expdf$m_drug_5 <- ifelse(exp$k1043 %in% c(1:3) | exp$k1050 %in% c(1:3) | exp$k1053 %in% c(1:3), 1, NA)
-expdf$m_drug_5 <- ifelse(is.na(expdf$m_drug_5) & (exp$k1043 %in% 4 | exp$k1050 %in% 4 | exp$k1053 %in% 4), 2, expdf$m_drug_5)
-expdf$m_drug_5 <- factor(expdf$m_drug_5, levels=c(2:1), labels=c('No','Yes')) #(past year)
+expdf$m_drug_5 <- ifelse(exp$k1050 %in% c(1:3) | exp$k1053 %in% c(1:3), 1, NA)
+expdf$m_drug_5 <- ifelse(is.na(expdf$m_drug_5) & (exp$k1050 %in% 4 | exp$k1053 %in% 4), 2, expdf$m_drug_5)
+expdf$m_drug_5 <- factor(expdf$m_drug_5, levels=c(2:1), labels=c('No','Yes')) #(k1050 = amphetamines, k1053 = heroin/methadone/cocaine, past year)
 
-expdf$m_drug_6 <- ifelse(exp$l3043 %in% c(1:3) | exp$l3050 %in% c(1:3) | exp$l3053 %in% c(1:3), 1, NA)
-expdf$m_drug_6 <- ifelse(is.na(expdf$m_drug_6) & (exp$l3043 %in% 4 | exp$l3050 %in% 4 | exp$l3053 %in% 4), 2, expdf$m_drug_6)
-expdf$m_drug_6 <- factor(expdf$m_drug_6, levels=c(2:1), labels=c('No','Yes')) #(since child 5 years old)
+expdf$m_drug_6 <- ifelse(exp$l3050 %in% c(1:3) | exp$l3053 %in% c(1:3), 1, NA)
+expdf$m_drug_6 <- ifelse(is.na(expdf$m_drug_6) & (exp$l3050 %in% 4 | exp$l3053 %in% 4), 2, expdf$m_drug_6)
+expdf$m_drug_6 <- factor(expdf$m_drug_6, levels=c(2:1), labels=c('No','Yes')) #(l3050 = amphetamines/other stimulants, l3053 = heroin, methadone, crack, cocaine, since child 5 years old)
 
-expdf$m_drug_9 <- ifelse(exp$p1053 %in% c(1:3) | exp$p1060 %in% c(1:3) | exp$p1063 %in% c(1:3), 1, NA)
-expdf$m_drug_9 <- ifelse(is.na(expdf$m_drug_9) & (exp$p1053 %in% 4 | exp$p1060 %in% 4 | exp$p1063 %in% 4), 2, expdf$m_drug_9)
-expdf$m_drug_9 <- factor(expdf$m_drug_9, levels=c(2:1), labels=c('No','Yes')) #(past 2 years)
+expdf$m_drug_9 <- ifelse(exp$p1060 %in% c(1:3) | exp$p1063 %in% c(1:3), 1, NA)
+expdf$m_drug_9 <- ifelse(is.na(expdf$m_drug_9) & (exp$p1060 %in% 4 | exp$p1063 %in% 4), 2, expdf$m_drug_9)
+expdf$m_drug_9 <- factor(expdf$m_drug_9, levels=c(2:1), labels=c('No','Yes')) #(p1060 = amphetamines or other stimulants, p1063 = heroin, methadone, crack, cocaine, past 2 years)
 
-expdf$m_drug_18 <- ifelse(exp$t5403 %in% c(1:3) | exp$t5406 %in% c(1:3) | exp$t5410 %in% c(1:3) | exp$t5412 %in% c(1:3), 1, NA)
-expdf$m_drug_18 <- ifelse(is.na(expdf$m_drug_18) & (exp$t5403 %in% 4 | exp$t5406 %in% 4 | exp$t5410 %in% 4 | exp$t5412 %in% 4), 2, expdf$m_drug_18)
-expdf$m_drug_18 <- factor(expdf$m_drug_18, levels=c(2:1), labels=c('No','Yes')) #(past 2 years)
+expdf$m_drug_18 <- ifelse(exp$t5406 %in% c(1:3) | exp$t5410 %in% c(1:3) | exp$t5412 %in% c(1:3), 1, NA)
+expdf$m_drug_18 <- ifelse(is.na(expdf$m_drug_18) & (exp$t5406 %in% 4 | exp$t5410 %in% 4 | exp$t5412 %in% 4), 2, expdf$m_drug_18)
+expdf$m_drug_18 <- factor(expdf$m_drug_18, levels=c(2:1), labels=c('No','Yes')) #(t5406 = cocaine, t5410 = amphetamines, ecstasy or other stimulants, t5412 = heroin, methadone, crack or other hard drug, past 2 years)
 
 #Mother alcoholism
 expdf$m_alcprob_gest <- factor(exp$d168, levels=c(3:1), labels=c('No','Yes','Yes')) #ever
@@ -431,8 +432,8 @@ expdf$mgm_alcprob_8 <- factor(exp$n2009, levels=c(2:1), labels=c('No','Yes')) #n
 expdf$mgf_alcprob_8 <- factor(exp$n2029, levels=c(2:1), labels=c('No','Yes')) #natural father
 
 #Maternal grandparents death addiction to alcohol or drugs
-expdf$mgm_alcprob_25 <- factor(exp$W2279, levels=c(0:1), labels=c('No','Yes')) #mgm cause of death sais to be addiction to alcohol or drugs
-expdf$mgf_alcprob_25 <- factor(exp$W3279, levels=c(0:1), labels=c('No','Yes')) #mgf cause of death sais to be addiction to alcohol or drugs
+expdf$mgm_alcprob_25 <- factor(exp$W2279, levels=c(0:1), labels=c('No','Yes')) #mgm cause of death said to be addiction to alcohol or drugs
+expdf$mgf_alcprob_25 <- factor(exp$W3279, levels=c(0:1), labels=c('No','Yes')) #mgf cause of death said to be addiction to alcohol or drugs
 expdf$mgmm_alcprob_25 <- factor(exp$W4279, levels=c(0:1), labels=c('No','Yes'))
 expdf$mgmf_alcprob_25 <- factor(exp$W5279, levels=c(0:1), labels=c('No','Yes'))
 expdf$mgfm_alcprob_25 <- factor(exp$W6279, levels=c(0:1), labels=c('No','Yes'))
@@ -648,25 +649,25 @@ expdf$mgff_mhpdeath_25 <- factor(expdf$mgff_mhpdeath_25, levels=c(2:1), labels=c
 
 ##Peer substance use
 #Friends smoke, drink, offered drugs
-expdf$friends_smk_10 <- factor(exp$fdaa480, levels=c(2:1), labels=c('No','Yes')) #friends have smoked cigarettes
-expdf$friends_smk_14 <- factor(exp$fg4820, levels=c(2:1), labels=c('No','Yes'))
-expdf$friends_smk_16 <- factor(exp$fh8340, levels=c(1:3), labels=c('No','Yes','Yes')) #past year
-expdf$friends_smk_18 <- factor(exp$FJAA3300, levels=c(1:3), labels=c('No','Yes','Yes')) #past year number of YPs friends that smoked cigarettes
-expdf$friends_smk_20 <- factor(exp$CCU3201, levels=c(1:5), labels=c('No',rep('Yes',4))) #between ages 18 and 21 number of friends who have smoked
+expdf$friends_smk_10 <- factor(exp$fdaa480, levels=c(2:1), labels=c('No','Yes')) #friends have smoked cigarettes (F10 clinic)
+expdf$friends_smk_14 <- factor(exp$fg4820, levels=c(2:1), labels=c('No','Yes')) #(TF2 clinic)
+expdf$friends_smk_16 <- factor(exp$fh8340, levels=c(1:3), labels=c('None/some','None/some','Most/all')) #past year (TF3 clinic)
+expdf$friends_smk_18 <- factor(exp$FJAA3300, levels=c(1:3), labels=c('None/some','None/some','Most/all')) #past year number of YPs friends that smoked cigarettes (TF4)
+expdf$friends_smk_20 <- factor(exp$CCU3201, levels=c(1:5), labels=c('None/some','None/some','None/some','Most/all','Most/all')) #between ages 18 and 21 number of friends who have smoked
 
 expdf$friends_alc_10 <- factor(exp$fdaa490, levels=c(2:1), labels=c('No','Yes')) #friends drunk alcohol
-expdf$friends_alc_13 <- factor(exp$ff7000, levels=c(2:1), labels=c('No','Yes')) #without permission
+expdf$friends_alc_13 <- factor(exp$ff7000, levels=c(2:1), labels=c('No','Yes')) #without permission (TF1 clinic)
 expdf$friends_alc_14 <- factor(exp$fg4870, levels=c(2:1), labels=c('No','Yes')) #without permission
-expdf$friends_alc_16 <- factor(exp$fh8341, levels=c(1:3), labels=c('No','Yes','Yes')) #past year number of YPs friends that drank alcohol
-expdf$friends_alc_18 <- factor(exp$FJAA3350, levels=c(1:3), labels=c('No','Yes','Yes')) #past year
-expdf$friends_alc_20 <- factor(exp$CCU3204, levels=c(1:5), labels=c('No',rep('Yes',4))) #between ages of 18 and 21, number of friends who would have drunk alcohol
-expdf$friends_drunk_20 <- factor(exp$CCU3202, levels=c(1:5), labels=c('No',rep('Yes',4))) #between ages of 18 and 21, number of friends who would have got drunk
-expdf$friends_alcprob_20 <- factor(exp$CCU3203, levels=c(1:5), labels=c('No',rep('Yes',4))) #between ages of 18 and 21, number of friends who would have had problems with alcohol
+expdf$friends_alc_16 <- factor(exp$fh8341, levels=c(1:3), labels=c('None/some','None/some','Most/all')) #past year number of YPs friends that drank alcohol
+expdf$friends_alc_18 <- factor(exp$FJAA3350, levels=c(1:3), labels=c('None/some','None/some','Most/all')) #past year
+expdf$friends_alc_20 <- factor(exp$CCU3204, levels=c(1:5), labels=c('None/some','None/some','None/some','Most/all','Most/all')) #between ages of 18 and 21, number of friends who would have drunk alcohol
+expdf$friends_drunk_20 <- factor(exp$CCU3202, levels=c(1:5), labels=c('None/some','None/some','None/some','Most/all','Most/all')) #between ages of 18 and 21, number of friends who would have got drunk
+expdf$friends_alcprob_20 <- factor(exp$CCU3203, levels=c(1:5), labels=c('None/some','None/some','None/some','Most/all','Most/all')) #between ages of 18 and 21, number of friends who would have had problems with alcohol
 
 expdf$friends_cana_10 <- factor(exp$fdaa520, levels=c(2:1), labels=c('No','Yes')) #friends smoked cannabis
 expdf$friends_cana_13 <- factor(exp$ff7720, levels=c(2:1), labels=c('No','Yes'))
 expdf$friends_cana_14 <- factor(exp$fg5420, levels=c(2:1), labels=c('No','Yes'))
-expdf$friends_cana_20 <- factor(exp$CCU3207, levels=c(1:5), labels=c('No',rep('Yes',4))) #between ages of 18 and 21, number of friends who would have had problems with alcohol
+expdf$friends_cana_20 <- factor(exp$CCU3207, levels=c(1:5), labels=c('None/some','None/some','None/some','Most/all','Most/all')) #between ages of 18 and 21, number of friends who would have had problems with alcohol
 
 expdf$friends_offdrug_10 <- factor(exp$fdaa500, levels=c(2:1), labels=c('No','Yes')) #friends offered drugs
 expdf$friends_offdrug_13 <- factor(exp$ff8000, levels=c(2:1), labels=c('No','Yes'))
@@ -686,13 +687,39 @@ expdf$everalc_8 <- factor(exp$f8aa107, levels=c(2:1), labels=c('No','Yes')) #dru
 expdf$everalc_10 <- factor(exp$fdaa492, levels=c(2:1), labels=c('No','Yes')) #drunk alcohol
 expdf$everalc_13 <- factor(exp$ff7011, levels=c(2:1), labels=c('No','Yes')) #without permission
 expdf$everalc_14 <- factor(exp$fg4872, levels=c(2:1), labels=c('No','Yes')) #without permission
-expdf$everalc_16 <- factor(exp$fh8510, levels=c(2:1), labels=c('No','Yes')) #whole drink
-expdf$everalc_17 <- factor(exp$ccs3500, levels=c(2:1), labels=c('No','Yes')) #ever
-expdf$everalc_C_18 <- factor(exp$FJAL050, levels=c(2:1), labels=c('No','Yes')) #whole drink
-expdf$everalc_Q_18 <- factor(exp$cct5020, levels=c(2:1), labels=c('No','Yes')) # whole drink
-expdf$everalc_20 <- factor(exp$CCU3050, levels=c(2:1), labels=c('No','Yes')) #whole drink
-expdf$everalc_22 <- factor(exp$YPB4130, levels=c(2:1), labels=c('No','Yes')) #whole drink
-expdf$everalc_24 <- factor(exp$FKAL1010, levels=c(0:1), labels=c('No','Yes')) #whole drink
+
+expdf$alc_16 <- ifelse(exp$fh8510 %in% 2 | exp$fh8511 %in% c(1:3), 1, NA)
+expdf$alc_16 <- ifelse(exp$fh8511 %in% c(4:6), 2, expdf$alc_16)
+expdf$alc_16 <- factor(expdf$alc_16, levels=c(1:2), labels=c('Less than weekly','More than weekly')) ## whole drink/Frequency of alcohol consumption past year
+
+expdf$alc_17 <- ifelse(exp$ccs3500 %in% 2 | exp$ccs3540 %in% c(1:3), 1, NA)
+expdf$alc_17 <- ifelse(exp$ccs3540 %in% c(4:5), 2, expdf$alc_17)
+expdf$alc_17 <- factor(expdf$alc_17, levels=c(1:2), labels=c('Less than weekly','More than weekly')) ## whole drink/Frequency of alcohol consumption past year
+
+expdf$alc_C_18 <- ifelse(exp$FJAL050 %in% 2 | exp$FJAL1000 %in% c(1:3), 1, NA)
+expdf$alc_C_18 <- ifelse(exp$FJAL1000 %in% c(4:5), 2, expdf$alc_C_18)
+expdf$alc_C_18 <- factor(expdf$alc_C_18, levels=c(1:2), labels=c('Less than weekly','More than weekly')) ## whole drink/Frequency of alcohol consumption
+
+expdf$alc_Q_18 <- ifelse(exp$cct5020 %in% 2 | exp$cct5030 %in% c(1:3), 1, NA)
+expdf$alc_Q_18 <- ifelse(exp$cct5030 %in% c(4:5), 2, expdf$alc_Q_18)
+expdf$alc_Q_18 <- factor(expdf$alc_Q_18, levels=c(1:2), labels=c('Less than weekly','More than weekly')) ## whole drink/Frequency of alcohol consumption
+
+expdf$alc_20 <- ifelse(exp$CCU3050 %in% 2 | exp$CCU3100 %in% c(1:3), 1, NA)
+expdf$alc_20 <- ifelse(exp$CCU3100 %in% c(4:5), 2, expdf$alc_20)
+expdf$alc_20 <- factor(expdf$alc_20, levels=c(1:2), labels=c('Less than weekly','More than weekly')) ## whole drink/Frequency of alcohol consumption past year
+
+expdf$alc_22 <- ifelse(exp$YPB4130 %in% 2 | exp$YPB4150 %in% c(1:3), 1, NA)
+expdf$alc_22 <- ifelse(exp$YPB4150 %in% c(4:5), 2, expdf$alc_22)
+expdf$alc_22 <- factor(expdf$alc_22, levels=c(1:2), labels=c('Less than weekly','More than weekly')) ## whole drink/Frequency of alcohol consumption past year
+
+expdf$alc_24 <- ifelse(exp$FKAL1010 %in% 0 | exp$FKAL1020 %in% c(0:2), 1, NA)
+expdf$alc_24 <- ifelse(exp$FKAL1020 %in% c(3:5), 2, expdf$alc_24)
+expdf$alc_24 <- factor(expdf$alc_24, levels=c(1:2), labels=c('Less than weekly','More than weekly')) ## whole drink/Frequency of alcohol consumption past year
+
+expdf$alc_28 <- ifelse(exp$YPH5660 %in% c(1:3), 1, NA)
+expdf$alc_28 <- ifelse(exp$YPH5660 %in% c(4:5), 2, expdf$alc_28)
+expdf$alc_28 <- factor(expdf$alc_28, levels=c(1:2), labels=c('Less than weekly','More than weekly')) #past 12 months
+
 
 expdf$evercana_10 <- factor(exp$fdaa522, levels=c(2:1), labels=c('No','Yes')) #child smoked cannabis
 expdf$evercana_13 <- factor(exp$ff7750, levels=c(2:1), labels=c('No','Yes')) #ever
@@ -705,6 +732,8 @@ expdf$evercana_Q_18 <- factor(exp$cct5050, levels=c(2:1), labels=c('No','Yes')) 
 expdf$evercana_20 <- factor(exp$CCU3300, levels=c(2:1), labels=c('No','Yes')) #ever
 expdf$evercana_22 <- factor(exp$YPB4390, levels=c(2:1), labels=c('No','Yes')) #ever
 expdf$evercana_24 <- factor(exp$FKCA1010, levels=c(0:1), labels=c('No','Yes')) #ever
+expdf$evercana_28 <- factor(exp$YPH5650, levels=c(6:1), labels=c('No',rep('Yes',5))) #past 12 months
+
 
 expdf$everdrunk_11 <- factor(exp$febp191, levels=c(2:1), labels=c('No','Yes')) #got really drunk on alcohol
 expdf$everhigh_11 <- factor(exp$febp193, levels=c(2:1), labels=c('No','Yes')) #used drugs to get high
@@ -721,11 +750,11 @@ expdf$everdrug_14 <- ifelse(is.na(expdf$everdrug_14) & (exp$ccr840 %in% 3 & exp$
 expdf$everdrug_14 <- factor(expdf$everdrug_14, levels=c(2:1), labels=c('No','Yes')) #respondent has tried aerosols, gas, glue, solvents, poppers, amphetamines, ecstacy, LSD, magic mushrooms, cocaine, crack, heroin
 
 expdf$drug_16 <- ifelse(exp$fh8700 %in% 1 | exp$fh8701 %in% 1 | exp$fh8702 %in% 1 | exp$fh8703 %in% 1 | exp$fh8704 %in% 1 | exp$fh8705 %in% 1 | exp$fh8706 %in% 1 | exp$fh8707 %in% 1 | exp$fh8709 %in% 1 | exp$fh8710 %in% 1, 1, NA)
-expdf$drug_16 <- ifelse(is.na(expdf$drug_16) & (exp$fh8701 %in% 2  & exp$fh8702 %in% 2  & exp$fh8703 %in% 2 & exp$fh8704 %in% 2 & exp$fh8705 %in% 2 & exp$fh8706 %in% 2 & exp$fh8707 %in% 2 & exp$fh8709 %in% 2 & exp$fh8710 %in% 2), 2, expdf$drug_16)
+expdf$drug_16 <- ifelse(is.na(expdf$drug_16) & (exp$fh8701 %in% 2 & exp$fh8702 %in% 2 & exp$fh8703 %in% 2 & exp$fh8704 %in% 2 & exp$fh8705 %in% 2 & exp$fh8706 %in% 2 & exp$fh8707 %in% 2 & exp$fh8709 %in% 2 & exp$fh8710 %in% 2), 2, expdf$drug_16)
 expdf$drug_16 <- factor(expdf$drug_16, levels=c(2:1), labels=c('No','Yes')) #since 15th birthday used amphetamines, barbiturates, ecstasy, cocaine, crack, LSD, heroin, ketamine, benzodiazepine, ritalin
 
 expdf$drug_17 <- ifelse(exp$ccs4150 %in% c(2:3) | exp$ccs4151 %in% c(2:3) | exp$ccs4152 %in% c(2:3) | exp$ccs4153 %in% c(2:3) | exp$ccs4154 %in% c(2:3) | exp$ccs4160 %in% c(2:3) | exp$ccs4161 %in% c(2:3) | exp$ccs4162 %in% c(2:3) | exp$ccs4163 %in% c(2:3) | exp$ccs4165 %in% c(2:3) | exp$ccs4166 %in% c(2:3) | exp$ccs4167 %in% c(2:3) | exp$ccs4168 %in% c(2:3) | exp$ccs4169 %in% c(2:3) | exp$ccs4170 %in% c(2:3), 1, NA)
-expdf$drug_17 <- ifelse(is.na(expdf$drug_17) & (exp$ccs4150 %in% 1  & exp$ccs4151 %in% 1  & exp$ccs4152 %in% 1 & exp$ccs4153 %in% 1 & exp$ccs4154 %in% 1 & exp$ccs4160 %in% 1 & exp$ccs4161 %in% 1 & exp$ccs4162 %in% 1 & exp$ccs4163 %in% 1 & exp$ccs4165 %in% 1 & exp$ccs4166 %in% 1 & exp$ccs4167 %in% 1 & exp$ccs4168 %in% 1 & exp$ccs4169 %in% 1 & exp$ccs4170 %in% 1), 2, expdf$drug_17)
+expdf$drug_17 <- ifelse(is.na(expdf$drug_17) & (exp$ccs4150 %in% 1 & exp$ccs4151 %in% 1 & exp$ccs4152 %in% 1 & exp$ccs4153 %in% 1 & exp$ccs4154 %in% 1 & exp$ccs4160 %in% 1 & exp$ccs4161 %in% 1 & exp$ccs4162 %in% 1 & exp$ccs4163 %in% 1 & exp$ccs4165 %in% 1 & exp$ccs4166 %in% 1 & exp$ccs4167 %in% 1 & exp$ccs4168 %in% 1 & exp$ccs4169 %in% 1 & exp$ccs4170 %in% 1), 2, expdf$drug_17)
 expdf$drug_17 <- factor(expdf$drug_17, levels=c(2:1), labels=c('No','Yes')) #since 15th birthday used aerosols, gas, glue, solvents, poppers, amphetamines, ecstasy, LSD, magic mushrooms, cocaine, crack, heroin, ketamine, steroids, white widows
 
 expdf$drug_C_18 <- ifelse(exp$FJDR5000 %in% 1 | exp$FJDR5150 %in% 1 | exp$FJDR5300 %in% 1 | exp$FJDR5450 %in% 1 | exp$FJDR5600 %in% 1 | exp$FJDR5750 %in% 1, 1, NA)
@@ -784,9 +813,9 @@ expdf$mfq_10 <- as.numeric(exp$fddp130)
 expdf$mfq_10[expdf$mfq_10<0] <- NA
 expdf$mfq_10_gr <- factor(ifelse(expdf$mfq_10 >= 12, 1, 0), levels=c(0:1), labels=c('<12','>=12'))
 
-expdf$mfq_12 <- as.numeric(exp$kw6100a) #complete cases
-expdf$mfq_12[expdf$mfq_12<0] <- NA
-expdf$mfq_12_gr <- factor(ifelse(expdf$mfq_12 >= 12, 1, 0), levels=c(0:1), labels=c('<12','>=12'))
+expdf$mfq_11 <- as.numeric(exp$kw6100a) #complete cases
+expdf$mfq_11[expdf$mfq_11<0] <- NA
+expdf$mfq_11_gr <- factor(ifelse(expdf$mfq_11 >= 12, 1, 0), levels=c(0:1), labels=c('<12','>=12'))
 
 exp[,c('ff6500','ff6502','ff6503','ff6504','ff6505','ff6506','ff6508','ff6509','ff6511','ff6512','ff6513','ff6514','ff6515')] <- sapply(exp[,c('ff6500','ff6502','ff6503','ff6504','ff6505','ff6506','ff6508','ff6509','ff6511','ff6512','ff6513','ff6514','ff6515')], function(x) replace(x, x < 0, NA))
 exp[,c('ff6500','ff6502','ff6503','ff6504','ff6505','ff6506','ff6508','ff6509','ff6511','ff6512','ff6513','ff6514','ff6515')] <- sapply(exp[,c('ff6500','ff6502','ff6503','ff6504','ff6505','ff6506','ff6508','ff6509','ff6511','ff6512','ff6513','ff6514','ff6515')], function(x) replace(x, c(3:1), c(0:2))[x])
@@ -843,6 +872,8 @@ expdf$mhp_22 <- factor(expdf$mhp_22, levels=c(2:1), labels=c('No','Yes')) #ever 
 expdf$mhmeds_24 <- ifelse(exp$FKCO1101 %in% 1 | exp$FKCO1102 %in% 1 | exp$FKCO1103 %in% 1 | exp$FKCO1104 %in% 1 | exp$FKCO1105 %in% 1, 1, NA)
 expdf$mhmeds_24 <- ifelse(is.na(expdf$mhmeds_24) & (exp$FKCO1101 %in% 0  & exp$FKCO1102 %in% 0 & exp$FKCO1103 %in% 0 & exp$FKCO1104 %in% 0 & exp$FKCO1105 %in% 0), 0, expdf$mhmeds_24)
 expdf$mhmeds_24 <- factor(expdf$mhmeds_24, levels=c(0:1), labels=c('No','Yes')) #participant taking antipsychotics, antidepressants, mood stabilisers or anxiolytics
+
+expdf$mhmeds_28 <- factor(exp$YPH7000, levels=c(2:1), labels=c('No','Yes')) #participant prescribed meds for depression or anxiety
 
 
 ##BMI
@@ -991,10 +1022,10 @@ exp$kw4060b_h <- exp$kw4060b/60
 exp$kw4061b_h <- exp$kw4061b/60
 exp$kw4060 <- (exp$kw4060a+exp$kw4060b_h) 
 exp$kw4061 <- (exp$kw4061a+exp$kw4061b_h)
-expdf$slp_wkdays_12 <- (24-exp$kw4061)+exp$kw4060
-expdf$slp_wkdays_12_gr <- ifelse(expdf$slp_wkdays_12 <= 10, 1, NA)
-expdf$slp_wkdays_12_gr <- ifelse(expdf$slp_wkdays_12 > 10, 2, expdf$slp_wkdays_12_gr)
-expdf$slp_wkdays_12_gr <- factor(expdf$slp_wkdays_12_gr, levels=c(2:1), labels=c('>=10','<= 10')) #school days (time between going to sleep and waking up)
+expdf$slp_wkdays_11 <- (24-exp$kw4061)+exp$kw4060
+expdf$slp_wkdays_11_gr <- ifelse(expdf$slp_wkdays_11 <= 10, 1, NA)
+expdf$slp_wkdays_11_gr <- ifelse(expdf$slp_wkdays_11 > 10, 2, expdf$slp_wkdays_11_gr)
+expdf$slp_wkdays_11_gr <- factor(expdf$slp_wkdays_11_gr, levels=c(2:1), labels=c('>=10','<=10')) #school days (time between going to sleep and waking up)
 
 exp$fh5420[exp$fh5420<0] <- NA 
 exp$fh5421[exp$fh5421<0] <- NA
@@ -1008,40 +1039,40 @@ exp$fh5426_h <- exp$fh5426/60
 exp$fh54201 <- (exp$fh5420+exp$fh5421_h) 
 exp$fh54256 <- (exp$fh5425+exp$fh5426_h)
 expdf$slp_wkdays_16 <- (24-exp$fh54201)+exp$fh54256
-expdf$slp_wkdays_16_gr <- ifelse(expdf$slp_wkdays_16 <= 10, 1, NA)
-expdf$slp_wkdays_16_gr <- ifelse(expdf$slp_wkdays_16 > 10, 2, expdf$slp_wkdays_16_gr)
-expdf$slp_wkdays_16_gr <- factor(expdf$slp_wkdays_16_gr, levels=c(2:1), labels=c('>=10','<= 10')) #school days (time between starts trying to go to sleep and waking up)
+expdf$slp_wkdays_16_gr <- ifelse(expdf$slp_wkdays_16 <= 8, 1, NA)
+expdf$slp_wkdays_16_gr <- ifelse(expdf$slp_wkdays_16 > 8, 2, expdf$slp_wkdays_16_gr)
+expdf$slp_wkdays_16_gr <- factor(expdf$slp_wkdays_16_gr, levels=c(2:1), labels=c('>=8','<=8')) #school days (time between starts trying to go to sleep and waking up)
 
 exp$YPE7440[exp$YPE7440<0] <- NA 
 expdf$slp_25 <- exp$YPE7440
 expdf$slp_25_gr <- ifelse(expdf$slp_25 <= 8, 1, NA)
 expdf$slp_25_gr <- ifelse(expdf$slp_25 > 8, 2, expdf$slp_25_gr)
-expdf$slp_25_gr <- factor(expdf$slp_25_gr, levels=c(2:1), labels=c('>=8','<= 8')) #number of hours sleeps in 24 hours
+expdf$slp_25_gr <- factor(expdf$slp_25_gr, levels=c(2:1), labels=c('>=8','<=8')) #number of hours sleeps in 24 hours
 
 
 ##Respondent or partner pregnant
-expdf$everpreg_17 <- factor(exp$ccs2210, levels=c(1:2), labels=c('Yes','No'))
-expdf$everpreg_21 <- factor(exp$YPA3310, levels=c(1:2), labels=c('Yes','No'))
+expdf$everpreg_17 <- factor(exp$ccs2210, levels=c(2:1), labels=c('No','Yes'))
+expdf$everpreg_21 <- factor(exp$YPA3310, levels=c(2:1), labels=c('No','Yes'))
+expdf$everpreg_22 <- factor(exp$YPB6020, levels=c(5:1), labels=c('No',rep('Yes',4))) #since 21
+expdf$everpreg_24 <- factor(exp$YPD1020, levels=c(0:4), labels=c('No',rep('Yes',4))) #since 23
 
-expdf$preg_20 <- factor(exp$CCU1005, levels=c(1:3), labels=c('Yes','Yes','No'))
-expdf$preg_22 <- factor(exp$YPB6020, levels=c(1:5), labels=c(rep('Yes',4),'No')) #since 21
-expdf$preg_24 <- factor(exp$YPD1020, levels=c(4:0), labels=c(rep('Yes',4),'No')) #since 23
-expdf$currpreg_21 <- factor(exp$YPA1020, levels=c(1:3), labels=c('Yes','Yes','No'))
-expdf$currpreg_24 <- factor(exp$YPC1070, levels=c(2:0), labels=c('Yes','Yes','No'))
+expdf$currpreg_20 <- factor(exp$CCU1005, levels=c(3:1), labels=c('No','Yes','Yes'))
+expdf$currpreg_21 <- factor(exp$YPA1020, levels=c(3:1), labels=c('No','Yes','Yes'))
+expdf$currpreg_23 <- factor(exp$YPC1070, levels=c(0:2), labels=c('No','Yes','Yes'))
 
 expdf$npregs_21 <- ifelse(exp$YPA3311 %in% c(0:1), 1, NA)
 expdf$npregs_21 <- ifelse(exp$YPA3311 > 1, 2, expdf$npregs_21)
-expdf$npregs_21 <- factor(expdf$npregs_21, levels=c(2:1), labels=c('>1','0-1'))
+expdf$npregs_21 <- factor(expdf$npregs_21, levels=c(1:2), labels=c('0-1','>1'))
 
-expdf$baby_22 <- factor(exp$YPB6030, levels=c(1:5), labels=c(rep('Yes',4),'No')) #since 21
-expdf$baby_24 <- factor(exp$YPD1030, levels=c(4:0), labels=c(rep('Yes',4),'No')) #since 23
+expdf$baby_22 <- factor(exp$YPB6030, levels=c(5:1), labels=c('No',rep('Yes',4))) #since 21
+expdf$baby_24 <- factor(exp$YPD1030, levels=c(0:4), labels=c('No',rep('Yes',4))) #since 23
 
-expdf$parent_20 <- factor(exp$CCU1000, levels=c(1:3), labels=c('Yes','Yes','No'))
-expdf$parent_21 <- factor(exp$YPA1000, levels=c(1:3), labels=c('Yes','Yes','No'))
-expdf$parent_22 <- factor(exp$YPB7000, levels=c(1:2), labels=c('Yes','No'))
-expdf$parent_23 <- factor(exp$YPC1050, levels=c(1:0), labels=c('Yes','No'))
-expdf$parent_25 <- factor(exp$YPE0101, levels=c(1:0), labels=c('Yes','No'))
-expdf$parent_28 <- factor(exp$YPH3010, levels=c(1:0), labels=c('Yes','No'))
+expdf$parent_20 <- factor(exp$CCU1000, levels=c(3:1), labels=c('No','Yes','Yes'))
+expdf$parent_21 <- factor(exp$YPA1000, levels=c(3:1), labels=c('No','Yes','Yes'))
+expdf$parent_22 <- factor(exp$YPB7000, levels=c(2:1), labels=c('No','Yes'))
+expdf$parent_23 <- factor(exp$YPC1050, levels=c(0:1), labels=c('No','Yes'))
+expdf$parent_25 <- factor(exp$YPE0101, levels=c(0:1), labels=c('No','Yes'))
+expdf$parent_28 <- factor(exp$YPH3010, levels=c(0:1), labels=c('No','Yes'))
 
 
 ##Cotinine (cutoffs from lower ends of this paper: https://pubmed.ncbi.nlm.nih.gov/27983665/)
@@ -1205,11 +1236,11 @@ expdf$p_sc_gest <- factor(expdf$p_sc_gest, levels=c(1:2), labels=c('I/II','III/I
 #Household income
 expdf$hhincome_11 <- ifelse(exp$r9020 %in% c(1:5), 1, NA)
 expdf$hhincome_11 <- ifelse(exp$r9020 %in% c(6:10), 2, expdf$hhincome_11)
-expdf$hhincome_11 <- factor(expdf$hhincome_11, levels=c(2:1), labels=c('>=£360','<£360')) #each week
+expdf$hhincome_11 <- factor(expdf$hhincome_11, levels=c(2:1), labels=c('>=??360','<??360')) #each week
 
 expdf$hhincome_18 <- ifelse(exp$t1300 %in% c(1:5), 1, NA)
 expdf$hhincome_18 <- ifelse(exp$t1300 %in% c(6:10), 2, expdf$hhincome_18)
-expdf$hhincome_18 <- factor(expdf$hhincome_18, levels=c(2:1), labels=c('>=£2100','<£2100')) #each month
+expdf$hhincome_18 <- factor(expdf$hhincome_18, levels=c(2:1), labels=c('>=??2100','<??2100')) #each month
 
 #Parental education
 expdf$m_hiqual_gest <- ifelse(exp$c645 %in% c(0:3), 1, NA)
@@ -1220,21 +1251,21 @@ expdf$p_hiqual_gest <- ifelse(exp$c666 %in% c(0:3), 1, NA)
 expdf$p_hiqual_gest <- ifelse(exp$c666 %in% c(4:5), 2, expdf$p_hiqual_gest)
 expdf$p_hiqual_gest <- factor(expdf$p_hiqual_gest, levels=c(2:1), labels=c('A level or above','O level or below'))
 
-expdf$m_qual_5 <- ifelse(exp$k6280 %in% 1 | exp$k6281 %in% 1 | exp$k6282 %in% 1 | exp$k6284 %in% 1 | exp$k6285 %in% 1, 1, NA)
-expdf$m_qual_5 <- ifelse(is.na(expdf$m_qual_5) & (exp$k6283 %in% 1 | exp$k6286 %in% 1 | exp$k6287 %in% 1 | exp$k6288 %in% 1 | exp$k6289 %in% 1 | exp$k6290 %in% 1 | exp$k6291 %in% 1 | exp$k6292 %in% 1), 2, expdf$m_qual_5) #other/not known quals not included
-expdf$m_qual_5 <- factor(expdf$m_qual_5, levels=c(2:1), labels=c('A-level/Nurse/City & Guilds/Teaching/Degree','No qualifications/CSE/GCSE/O-level/Vocational/Apprenticeship'))
+expdf$m_qual_5 <- ifelse(exp$k6281 %in% 1 | exp$k6282 %in% 1 | exp$k6283 %in% 1 | exp$k6284 %in% 1 | exp$k6285 %in% 1 | exp$k6286 %in% 1 | exp$k6287 %in% 1 | exp$k6288 %in% 1 | exp$k6289 %in% 1 | exp$k6290 %in% 1 | exp$k6291 %in% 1 | exp$k6292 %in% 1, 1, NA)
+expdf$m_qual_5 <- ifelse(is.na(expdf$m_qual_5) & (exp$k6280 %in% 1), 2, expdf$m_qual_5) #other/not known quals not included
+expdf$m_qual_5 <- factor(expdf$m_qual_5, levels=c(1:2), labels=c('Any qualifications','No qualifications'))
 
-expdf$m_qual_8 <- ifelse(exp$n4012 %in% 1 | exp$n4000 %in% 1 | exp$n4001 %in% 1 | exp$n4003 %in% 1 | exp$n4004 %in% 1, 1, NA)
-expdf$m_qual_8 <- ifelse(is.na(expdf$m_qual_8) & (exp$n4002 %in% 1 | exp$n4005 %in% 1 | exp$n4006 %in% 1 | exp$n4007 %in% 1 | exp$n4008 %in% 1 | exp$n4009 %in% 1 | exp$n4010 %in% 1 | exp$n4011 %in% 1), 2, expdf$m_qual_8) #other/not known quals not included
-expdf$m_qual_8 <- factor(expdf$m_qual_8, levels=c(2:1), labels=c('A-level/Nurse/City & Guilds/Teaching/Degree','No qualifications/CSE/GCSE/O-level/Vocational/Apprenticeship'))
+expdf$p_qual_5 <- ifelse(exp$k6301 %in% 1 | exp$k6302 %in% 1 | exp$k6303 %in% 1 | exp$k6304 %in% 1 | exp$k6305 %in% 1 | exp$k6306 %in% 1 | exp$k6307 %in% 1 | exp$k6308 %in% 1 | exp$k6309 %in% 1 | exp$k6310 %in% 1 | exp$k6311 %in% 1 | exp$k6312 %in% 1, 1, NA)
+expdf$p_qual_5 <- ifelse(is.na(expdf$p_qual_5) & (exp$k6300 %in% 1), 2, expdf$p_qual_5) #other/not known quals not included
+expdf$p_qual_5 <- factor(expdf$p_qual_5, levels=c(1:2), labels=c('Any qualifications','No qualifications'))
 
-expdf$p_qual_5 <- ifelse(exp$k6300 %in% 1 | exp$k6301 %in% 1 | exp$k6302 %in% 1 | exp$k6304 %in% 1 | exp$k6305 %in% 1, 1, NA)
-expdf$p_qual_5 <- ifelse(is.na(expdf$p_qual_5) & (exp$k6303 %in% 1 | exp$k6306 %in% 1 | exp$k6307 %in% 1 | exp$k6308 %in% 1 | exp$k6309 %in% 1 | exp$k6310 %in% 1 | exp$k6311 %in% 1 | exp$k6312 %in% 1), 2, expdf$p_qual_5) #other/not known quals not included
-expdf$p_qual_5 <- factor(expdf$p_qual_5, levels=c(2:1), labels=c('A-level/Nurse/City & Guilds/Teaching/Degree','No qualifications/CSE/GCSE/O-level/Vocational/Apprenticeship'))
+expdf$m_qual_8 <- ifelse(exp$n4000 %in% 1 | exp$n4001 %in% 1 | exp$n4002 %in% 1 | exp$n4003 %in% 1 | exp$n4004 %in% 1 | exp$n4005 %in% 1 | exp$n4006 %in% 1 | exp$n4007 %in% 1 | exp$n4008 %in% 1 | exp$n4009 %in% 1 | exp$n4010 %in% 1 | exp$n4011 %in% 1, 1, NA)
+expdf$m_qual_8 <- ifelse(is.na(expdf$m_qual_8) & (exp$n4012 %in% 1), 2, expdf$m_qual_8) #other/not known quals not included
+expdf$m_qual_8 <- factor(expdf$m_qual_8, levels=c(1:2), labels=c('Any qualifications','No qualifications'))
 
-expdf$p_qual_8 <- ifelse(exp$n4032 %in% 1 | exp$n4020 %in% 1 | exp$n4021 %in% 1 | exp$n4023 %in% 1 | exp$n4024 %in% 1, 1, NA)
-expdf$p_qual_8 <- ifelse(is.na(expdf$p_qual_8) & (exp$n4022 %in% 1 | exp$n4025 %in% 1 | exp$n4026 %in% 1 | exp$n4027 %in% 1 | exp$n4028 %in% 1 | exp$n4029 %in% 1 | exp$n4030 %in% 1 | exp$n4031 %in% 1), 2, expdf$p_qual_8) #other/not known quals not included
-expdf$p_qual_8 <- factor(expdf$p_qual_8, levels=c(2:1), labels=c('A-level/Nurse/City & Guilds/Teaching/Degree','No qualifications/CSE/GCSE/O-level/Vocational/Apprenticeship'))
+expdf$p_qual_8 <- ifelse(exp$n4020 %in% 1 | exp$n4021 %in% 1 | exp$n4022 %in% 1 | exp$n4023 %in% 1 | exp$n4024 %in% 1 | exp$n4025 %in% 1 | exp$n4026 %in% 1 | exp$n4027 %in% 1 | exp$n4028 %in% 1 | exp$n4029 %in% 1 | exp$n4030 %in% 1 | exp$n4031 %in% 1, 1, NA)
+expdf$p_qual_8 <- ifelse(is.na(expdf$p_qual_8) & (exp$n4032 %in% 1), 2, expdf$p_qual_8) #other/not known quals not included
+expdf$p_qual_8 <- factor(expdf$p_qual_8, levels=c(1:2), labels=c('Any qualifications','No qualifications'))
 
 #Maternal grandparents education
 expdf$mgm_hiqual_gest <- ifelse(exp$c686 %in% c(0:3), 1, NA)
@@ -1245,54 +1276,59 @@ expdf$mgf_hiqual_gest <- ifelse(exp$c706 %in% c(0:3), 1, NA)
 expdf$mgf_hiqual_gest <- ifelse(exp$c706 %in% c(4:5), 2, expdf$mgf_hiqual_gest)
 expdf$mgf_hiqual_gest <- factor(expdf$mgf_hiqual_gest, levels=c(2:1), labels=c('A level or above','O level or below'))
 
-expdf$mgm_qual_8 <- ifelse(exp$n4052 %in% 1 | exp$n4040 %in% 1 | exp$n4041 %in% 1 | exp$n4043 %in% 1 | exp$n4044 %in% 1, 1, NA)
-expdf$mgm_qual_8 <- ifelse(is.na(expdf$mgm_qual_8) & (exp$n4042 %in% 1 | exp$n4045 %in% 1 | exp$n4046 %in% 1 | exp$n4047 %in% 1 | exp$n4048 %in% 1 | exp$n4049 %in% 1 | exp$n4050 %in% 1 | exp$n4051 %in% 1), 2, expdf$mgm_qual_8) #other/not known quals not included
-expdf$mgm_qual_8 <- factor(expdf$mgm_qual_8, levels=c(2:1), labels=c('A level/Nurse/City & Guilds/Teaching/Degree','No qualifications/CSE/GCSE/O level/Vocational/Apprenticeship'))
+expdf$mgm_qual_8 <- ifelse(exp$n4040 %in% 1 | exp$n4041 %in% 1 | exp$n4042 %in% 1 | exp$n4043 %in% 1 | exp$n4044 %in% 1 | exp$n4045 %in% 1 | exp$n4046 %in% 1 | exp$n4047 %in% 1 | exp$n4048 %in% 1 | exp$n4049 %in% 1 | exp$n4050 %in% 1 | exp$n4051 %in% 1, 1, NA)
+expdf$mgm_qual_8 <- ifelse(is.na(expdf$mgm_qual_8) & (exp$n4052 %in% 1), 2, expdf$mgm_qual_8) #other/not known quals not included
+expdf$mgm_qual_8 <- factor(expdf$mgm_qual_8, levels=c(1:2), labels=c('Any qualifications','No qualifications'))
 
-expdf$mgf_qual_8 <- ifelse(exp$n4072 %in% 1 | exp$n4060 %in% 1 | exp$n4061 %in% 1 | exp$n4063 %in% 1 | exp$n4064 %in% 1, 1, NA)
-expdf$mgf_qual_8 <- ifelse(is.na(expdf$mgf_qual_8) & (exp$n4062 %in% 1 | exp$n4065 %in% 1 | exp$n4066 %in% 1 | exp$n4067 %in% 1 | exp$n4068 %in% 1 | exp$n4069 %in% 1 | exp$n4070 %in% 1 | exp$n4071 %in% 1), 2, expdf$mgf_qual_8) #other/not known quals not included
-expdf$mgf_qual_8 <- factor(expdf$mgf_qual_8, levels=c(2:1), labels=c('A level/Nurse/City & Guilds/Teaching/Degree','No qualifications/CSE/GCSE/O level/Vocational/Apprenticeship'))
+expdf$mgf_qual_8 <- ifelse(exp$n4060 %in% 1 | exp$n4061 %in% 1 | exp$n4062 %in% 1 | exp$n4063 %in% 1 | exp$n4064 %in% 1 | exp$n4065 %in% 1 | exp$n4066 %in% 1 | exp$n4067 %in% 1 | exp$n4068 %in% 1 | exp$n4069 %in% 1 | exp$n4070 %in% 1 | exp$n4071 %in% 1, 1, NA)
+expdf$mgf_qual_8 <- ifelse(is.na(expdf$mgf_qual_8) & (exp$n4072 %in% 1), 2, expdf$mgf_qual_8) #other/not known quals not included
+expdf$mgf_qual_8 <- factor(expdf$mgf_qual_8, levels=c(1:2), labels=c('Any qualifications','No qualifications'))
 
 
 ##Education
 #Aspirations and plans
-expdf$y11asp_13 <- factor(exp$ccp800, level=c(1:2), c('Stay in education','Leave education'))
-expdf$y11perc_13 <- factor(exp$ccp815, level=c(1:2), c('Stay in education','Leave education'))
+expdf$y11asp_14 <- factor(exp$ccp800, level=c(1:2), c('Stay in education','Leave education'))
+expdf$y11perc_14 <- factor(exp$ccp815, level=c(1:2), c('Stay in education','Leave education'))
 expdf$asp_16 <- factor(exp$ccxa290, level=c(1:2), c('Stay in education','Leave education'))
 
 #Educational qualifications obtained
-expdf$qual_18 <- ifelse((exp$cct2902 %in% 1 | exp$cct2904 %in% 1 | exp$cct2906 %in% 1 | exp$cct2916 %in% 1), 1, NA) #other/not known quals not included
-expdf$qual_18 <- ifelse(is.na(expdf$qual_18) & (exp$cct2900 %in% 1 | exp$cct2901 %in% 1 | exp$cct2908 %in% 1 | exp$cct2909 %in% 1 | exp$cct2910 %in% 1 | exp$cct2912 %in% 1 | exp$cct2914 %in% 1 | exp$cct2915 %in% 1), 2, expdf$qual_18)
-expdf$qual_18 <- factor(expdf$qual_18, levels=c(1:2), labels=c('A level/AVCE/City & Guilds','GCSEs/Key Skills/Basic Skills/GNVQs/NVQs/Edexcel/BTEC/LQL/OCR'))
+expdf$qual_18 <- ifelse((exp$cct2902 %in% 1 | exp$cct2904 %in% 1 | exp$cct2906 %in% 1), 1, NA) #other/not known quals not included
+expdf$qual_18 <- ifelse(is.na(expdf$qual_18) & (exp$cct2900 %in% 1 | exp$cct2901 %in% 1 | exp$cct2908 %in% 1 | exp$cct2909 %in% 1 | exp$cct2910 %in% 1 | exp$cct2912 %in% 1 | exp$cct2914 %in% 1 | exp$cct2915 %in% 1 | exp$cct2916 %in% 1), 2, expdf$qual_18)
+expdf$qual_18 <- factor(expdf$qual_18, levels=c(1:2), labels=c('A levels or equivalent','Other qualifications'))
 
-expdf$qual_20 <- ifelse((exp$CCU4000 %in% 1 | exp$CCU4001 %in% 1 | exp$CCU4002 %in% 1 | exp$CCU4005 %in% 1 | exp$CCU4006 %in% 1 | exp$CCU4007 %in% 1 | exp$CCU4008 %in% 1 | exp$CCU4009 %in% 1 | exp$CCU4010 %in% 1 | exp$CCU4013 %in% 1 | exp$CCU4014 %in% 1 | exp$CCU4017 %in% 1 | exp$CCU4020 %in% 1), 1, NA) #other/not known quals not included
-expdf$qual_20 <- ifelse(is.na(expdf$qual_20) & exp$CCU4003 %in% 1 | exp$CCU4004 %in% 1 | exp$CCU4011 %in% 1 | exp$CCU4012 %in% 1 | exp$CCU4015 %in% 1 | exp$CCU4016 %in% 1 | exp$CCU4018 %in% 1 | exp$CCU4019 %in% 1 | exp$CCU4021 %in% 1 | exp$CCU4022 %in% 1 | exp$CCU4023 %in% 1, 2, expdf$qual_20)
-expdf$qual_20 <- factor(expdf$qual_20, levels=c(1:2), labels=c('Degree/HNC/HND/ONC/OND/Teaching/Nursing/A level/New diploma/Baccalaureate/Access to HE/Higher qualification/City & Guilds','BTEC/EdExcel/LQL/SCOTEC/NVQ/SVQ/GNVQ/GSVQ/Standard Grade qualification/GCSE/Intermediate qualifications/RSA/OCR/Key Skills/Basic Skills/Entry-Level'))
+expdf$qual_20 <- ifelse((exp$CCU4000 %in% 1 | exp$CCU4001 %in% 1 | exp$CCU4002 %in% 1 | exp$CCU4005 %in% 1 | exp$CCU4006 %in% 1 | exp$CCU4007 %in% 1 | exp$CCU4008 %in% 1 | exp$CCU4009 %in% 1 | exp$CCU4010 %in% 1 | exp$CCU4013 %in% 1 | exp$CCU4014 %in% 1 | exp$CCU4017 %in% 1), 1, NA) #other/not known quals not included
+expdf$qual_20 <- ifelse(is.na(expdf$qual_20) & (exp$CCU4003 %in% 1 | exp$CCU4004 %in% 1 | exp$CCU4011 %in% 1 | exp$CCU4012 %in% 1 | exp$CCU4015 %in% 1 | exp$CCU4016 %in% 1 | exp$CCU4018 %in% 1 | exp$CCU4019 %in% 1 | exp$CCU4020 %in% 1 | exp$CCU4021 %in% 1 | exp$CCU4022 %in% 1 | exp$CCU4023 %in% 1), 2, expdf$qual_20)
+expdf$qual_20 <- factor(expdf$qual_20, levels=c(1:2), labels=c('A levels/Higher education','Other qualifications'))
+
+expdf$hiqual_26 <- ifelse((exp$YPF7970 %in% c(4:8)), 1, NA) 
+expdf$hiqual_26 <- ifelse(is.na(expdf$hiqual_26) & (exp$YPF7970 %in% c(1:3)), 2, expdf$hiqual_26)
+expdf$hiqual_26 <- factor(expdf$hiqual_26, levels=c(1:2), labels=c('Higher education','A levels or below'))
+
+exp$YPF7980[exp$YPF7980 < 0] <- NA
+expdf$eduyrs_26 <- ifelse((exp$YPF7980 >= 15), 1, NA) 
+expdf$eduyrs_26 <- ifelse(is.na(expdf$eduyrs_26) & (exp$YPF7980 < 15), 2, expdf$eduyrs_26)
+expdf$eduyrs_26 <- factor(expdf$eduyrs_26, levels=c(1:2), labels=c('>=15','<15'))
 
 #Educational qualifications currently studying
 expdf$uni_18 <- ifelse(exp$cct2993 %in% c(1:2), 1, NA)
 expdf$uni_18 <- ifelse(exp$cct2993 %in% c(3:4), 2, expdf$uni_18)
 expdf$uni_18 <- factor(expdf$uni_18, levels=c(1:2), labels=c('Likely','Not likely'))
 
-expdf$studqual_18 <- ifelse(exp$cct2955 %in% 1 | exp$cct2956 %in% 1 | exp$cct2963 %in% 1 | exp$cct2964 %in% 1 | exp$cct2965 %in% 1 | exp$cct2967 %in% 1 | exp$cct2969 %in% 1 | exp$cct2970 %in% 1, 1, NA)
-expdf$studqual_18 <- ifelse(is.na(expdf$studqual_18) & (exp$cct2957 %in% 1 | exp$cct2959 %in% 1 | exp$cct2961 %in% 1 | exp$cct2971 %in% 1), 2, expdf$studqual_18) #other/not known quals not included
-expdf$studqual_18 <- factor(expdf$studqual_18, levels=c(2:1), labels=c('A level/AVCE/City & Guilds','GCSE/Key Skills/Basic Skills/GNVQ/NVQ/Edexcel/BTEC/LQL/OCR'))
+expdf$studqual_18 <- ifelse(exp$cct2957 %in% 1 | exp$cct2959 %in% 1 | exp$cct2961 %in% 1, 1, NA)
+expdf$studqual_18 <- ifelse(is.na(expdf$studqual_18) & (exp$cct2955 %in% 1 | exp$cct2956 %in% 1 | exp$cct2963 %in% 1 | exp$cct2964 %in% 1 | exp$cct2965 %in% 1 | exp$cct2967 %in% 1 | exp$cct2969 %in% 1 | exp$cct2970 %in% 1 | exp$cct2971 %in% 1), 2, expdf$studqual_18) #other/not known quals not included
+expdf$studqual_18 <- factor(expdf$studqual_18, levels=c(2:1), labels=c('A levels or equivalent','Other qualifications'))
 
-expdf$studqual_22 <- ifelse(exp$YPB9090 %in% 1 | exp$YPB9093 %in% 1 | exp$YPB9094 %in% 1 | exp$YPB9095 %in% 1 | exp$YPB9096 %in% 1, 1, NA)
-expdf$studqual_22 <- ifelse(is.na(expdf$studqual_22) & (exp$YPB9091 %in% 1 | exp$YPB9092 %in% 1 | exp$YPB9097 %in% 1 | exp$YPB9098 %in% 1 | exp$YPB9099 %in% 1), 2, expdf$studqual_22) #other/not known quals not included
-expdf$studqual_22 <- factor(expdf$studqual_22, levels=c(1:2), labels=c('A level/AVCE/City & Guilds/Degree','GCSE/GNVQ/NVQ/Edexcel/BTEC/LQL/OCR'))
+expdf$studqual_22 <- ifelse(exp$YPB9091 %in% 1 | exp$YPB9092 %in% 1 | exp$YPB9098 %in% 1 | exp$YPB9099 %in% 1, 1, NA)
+expdf$studqual_22 <- ifelse(is.na(expdf$studqual_22) & (exp$YPB9090 %in% 1 | exp$YPB9093 %in% 1 | exp$YPB9094 %in% 1 | exp$YPB9095 %in% 1 | exp$YPB9096 %in% 1 | exp$YPB9097 %in% 1), 2, expdf$studqual_22) #other/not known quals not included
+expdf$studqual_22 <- factor(expdf$studqual_22, levels=c(1:2), labels=c('A levels/Higher education','Other qualifications'))
 
-expdf$inedu_22 <- ifelse(exp$YPB9005 %in% 1 | exp$YPB9080 %in% c(1,2), 1, NA)
-expdf$inedu_22 <- ifelse(exp$YPB9005 %in% 2 | exp$YPB9080 %in% 3, 2, expdf$inedu_22)
+expdf$inedu_22 <- ifelse(exp$YPB9080 %in% c(1,2), 1, NA)
+expdf$inedu_22 <- ifelse(exp$YPB9080 %in% 3, 2, expdf$inedu_22)
 expdf$inedu_22 <- factor(expdf$inedu_22, levels=c(1:2), labels=c('Yes','No'))
 
 
 ##Employment
 #Economic activity
-expdf$econact_17 <- ifelse(exp$ccs7500 %in% 1 | exp$ccs7523 %in% 1 | exp$ccs7524 %in% 1, 1, NA)
-expdf$econact_17 <- ifelse(exp$ccs7520 %in% 1 | exp$ccs7521 %in% 1 | exp$ccs7522 %in% 1, 2, expdf$econact_17)
-expdf$econact_17 <- factor(expdf$econact_17, levels=c(1:2), labels=c('Employed/In education','Unemployed/Disabled/Volunteer'))
-
 expdf$eduact_18 <- ifelse(exp$cct2950 %in% c(1:6), 1, NA)
 expdf$eduact_18 <- ifelse(exp$cct2950 %in% 7, 2, expdf$eduact_18)
 expdf$eduact_18 <- factor(expdf$eduact_18, levels=c(1:2), labels=c('In education or training','Not in education or training'))
@@ -1305,34 +1341,50 @@ expdf$eduact_21 <- ifelse(exp$YPA8010 %in% c(1:6), 1, NA)
 expdf$eduact_21 <- ifelse(exp$YPA8010 %in% 7, 2, expdf$eduact_21)
 expdf$eduact_21 <- factor(expdf$eduact_21, levels=c(1:2), labels=c('In education or training','Not in education or training'))
 
+expdf$econact_17 <- ifelse(exp$ccs7500 %in% 1 | exp$ccs7510 %in% 1 | exp$ccs7523 %in% 1 | exp$ccs7524 %in% 1, 1, NA)
+expdf$econact_17 <- ifelse(is.na(expdf$econact_17) & (exp$ccs7520 %in% 1 | exp$ccs7521 %in% 1 | exp$ccs7522 %in% 1), 2, expdf$econact_17)
+expdf$econact_17 <- factor(expdf$econact_17, levels=c(1:2), labels=c('Employed/Education','Unemployed/Disabled/Volunteer'))
+
+expdf$econact_22 <- ifelse(exp$YPB9000 %in% 1 | exp$YPB9001 %in% 1 | exp$YPB9002 %in% 1 | exp$YPB9005 %in% 1 | exp$YPB9007 %in% 1, 1, NA)
+expdf$econact_22 <- ifelse(is.na(expdf$econact_22) & (exp$YPB9003 %in% 1 | exp$YPB9004 %in% 1 | exp$YPB9006 %in% 1 | exp$YPB9008 %in% 1), 2, expdf$econact_22)
+expdf$econact_22 <- factor(expdf$econact_22, levels=c(1:2), labels=c('Employed/Education','Unemployed/Disabled/Volunteer/Carer'))
+
 expdf$econact_23 <- ifelse(exp$YPC2450 %in% 1 | exp$YPC2451 %in% 1 | exp$YPC2452 %in% 1 | exp$YPC2453 %in% 1 | exp$YPC2456 %in% 1 | exp$YPC2458 %in% 1, 1, NA)
-expdf$econact_23 <- ifelse(exp$YPC2454 %in% 1 | exp$YPC2455 %in% 1 | exp$YPC2457 %in% 1 | exp$YPC2459 %in% 1, 2, expdf$econact_23)
-expdf$econact_23 <- factor(expdf$econact_23, levels=c(1:2), labels=c('Employed/Training/In education/Apprenticeship','Unemployed/Disabled/Volunteer/Carer'))
+expdf$econact_23 <- ifelse(is.na(expdf$econact_23) & (exp$YPC2454 %in% 1 | exp$YPC2455 %in% 1 | exp$YPC2457 %in% 1 | exp$YPC2459 %in% 1), 2, expdf$econact_23)
+expdf$econact_23 <- factor(expdf$econact_23, levels=c(1:2), labels=c('Employed/Education','Unemployed/Disabled/Volunteer/Carer'))
+
+expdf$econact_25 <- ifelse(exp$YPE6000 %in% 1 | exp$YPE6001 %in% 1 | exp$YPE6002 %in% 1 | exp$YPE6003 %in% 1 | exp$YPE6006 %in% 1 | exp$YPE6008 %in% 1, 1, NA)
+expdf$econact_25 <- ifelse(is.na(expdf$econact_25) & (exp$YPE6004 %in% 1 | exp$YPE6005 %in% 1 | exp$YPE6007 %in% 1 | exp$YPE6009 %in% 1), 2, expdf$econact_25)
+expdf$econact_25 <- factor(expdf$econact_25, levels=c(1:2), labels=c('Employed/Education','Unemployed/Disabled/Volunteer/Carer'))
 
 expdf$workact_18 <- ifelse(exp$cct3100 %in% c(1:3,7), 1, NA)
 expdf$workact_18 <- ifelse(exp$cct3100 %in% c(4:6), 2, expdf$workact_18)
 expdf$workact_18 <- factor(expdf$workact_18, levels=c(1:2), labels=c('In work/Education','Unemployed/Disabled/Looking after family'))
 
 expdf$workact_20 <- ifelse(exp$CCU4060 %in% c(1:3,5), 1, NA)
-expdf$workact_20 <- ifelse(exp$CCU4060 %in% c(4,6), 2, expdf$workact_20)
-expdf$workact_20 <- factor(expdf$workact_20, levels=c(1:2), labels=c('In work/Education','Unemployed or something else'))
+expdf$workact_20 <- ifelse(exp$CCU4060 %in% c(4), 2, expdf$workact_20)
+expdf$workact_20 <- factor(expdf$workact_20, levels=c(1:2), labels=c('In work/Education','Unemployed'))
 
 expdf$workact_21 <- ifelse(exp$YPA8020 %in% c(1:3,5), 1, NA)
-expdf$workact_21 <- ifelse(exp$YPA8020 %in% c(4,6), 2, expdf$workact_21)
-expdf$workact_21 <- factor(expdf$workact_21, levels=c(1:2), labels=c('In work/Education','Unemployed or something else'))
+expdf$workact_21 <- ifelse(exp$YPA8020 %in% c(4), 2, expdf$workact_21)
+expdf$workact_21 <- factor(expdf$workact_21, levels=c(1:2), labels=c('In work/Education','Unemployed'))
 
 expdf$employst_23 <- ifelse(exp$YPC2493 %in% c(1:2), 1, NA)
 expdf$employst_23 <- ifelse(exp$YPC2493 %in% c(3:4), 2, expdf$employst_23)
 expdf$employst_23 <- factor(expdf$employst_23, levels=c(1:2), labels=c('Employer/Manager','Employee'))
 
+expdf$income_25 <- ifelse(exp$YPE6020 %in% c(1:3), 1, NA)
+expdf$income_25 <- ifelse(exp$YPE6020 %in% c(4:7), 2, expdf$income_25)
+expdf$income_25 <- factor(expdf$income_25, levels=c(1:2), labels=c('<??1500 per month','>=??1500 per month'))
+
 #NS-SEC occupational class
-expdf$nssec_all_23 <- ifelse(exp$YPC2491 %in% c(1:4), 1, NA)
-expdf$nssec_all_23 <- ifelse(exp$YPC2491 %in% c(5:7), 2, expdf$nssec_all_23)
-expdf$nssec_all_23 <- factor(expdf$nssec_all_23, levels=c(1:2), labels=c('Managerial/Professional/Intermediate/Employer','Technical/Semi-routine/Routine'))
+expdf$nssec_all_23 <- ifelse(exp$YPC2491 %in% c(1:3), 1, NA)
+expdf$nssec_all_23 <- ifelse(exp$YPC2491 %in% c(4:7), 2, expdf$nssec_all_23)
+expdf$nssec_all_23 <- factor(expdf$nssec_all_23, levels=c(1:2), labels=c('Managerial/Admin/Professional/Intermediate/Employer','Lower supervisory/Technical/Semi-routine/Routine'))
 
 expdf$nssec_5_23 <- ifelse(exp$YPC2492 %in% c(1:3), 1, NA)
 expdf$nssec_5_23 <- ifelse(exp$YPC2492 %in% c(4:5), 2, expdf$nssec_5_23)
-expdf$nssec_5_23 <- factor(expdf$nssec_5_23, levels=c(1:2), labels=c('Managerial/Professional/Intermediate/Employer','Technical/Semi-routine/Routine'))
+expdf$nssec_5_23 <- factor(expdf$nssec_5_23, levels=c(1:2), labels=c('Managerial/Admin/Professional/Intermediate/Employer','Lower supervisory/Technical/Semi-routine/Routine'))
 
 #job
 expdf$emply_25 <- factor(exp$YPE7470, levels=c(1:0), c('Yes','No'))
@@ -1872,3 +1924,4 @@ expdf$trauma0to17 <- factor(exp$clon166, levels=c(0:1), labels=c('No','Yes'))
 ##SAVE (N = 511)
 #save(expdf, file='//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/exposure_measures.rda')
 write_dta(data=expdf, path='//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/exposure_measures.dta')
+rm(exp)

@@ -1,0 +1,22 @@
+---
+title: "Various plots"
+author: "Alexandria Andrayas"
+date: "13/09/2023"
+output: word_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r load-packages, include=FALSE}
+library(ggplot2)
+```
+
+```{r, echo=FALSE, message=FALSE}
+source('C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Longitudinal smoking/Scripts/lca_other_plts.R')
+```
+
+```{r p, fig.width=16,fig.height=23, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p
+
+```
