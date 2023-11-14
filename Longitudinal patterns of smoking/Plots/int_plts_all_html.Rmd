@@ -24,6 +24,14 @@ source('C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking
 load("C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Longitudinal smoking/Figures/int_plts_all.Rda")
 ```
 
+## Legend
+<br>
+
+```{r, fig.width=3, fig.height=2, dpi=300, echo=FALSE, message=FALSE, results='asis'}
+p$leg
+```
+
+
 ## Comparison  
 <br>
 
@@ -99,6 +107,7 @@ p$C5VC3
 p$C2VC5
 ```
 
+
 ## Theme
 <br>
 
@@ -126,7 +135,7 @@ p$fam_socdem
 p$lifestyle
 ```
 
-### Individual sociodemographic factors
+### Individual sociodemographics
 
 ```{r, fig.width=3, fig.height=4, dpi=300, echo=FALSE, message=FALSE, results='asis'}
 p$socdem
