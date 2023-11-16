@@ -997,9 +997,9 @@ expdf$exerc_18 <- ifelse(exp$cct4105 %in% c(1:2), 1, NA)
 expdf$exerc_18 <- ifelse(exp$cct4105 %in% c(3:5), 2, expdf$exerc_18)
 expdf$exerc_18 <- factor(expdf$exerc_18, levels=c(1:2), labels = c('> Weekly','< Weekly'))
 
-expdf$exerc_22 <- ifelse(exp$YPB2040 %in% c(1:2), 1, NA)
-expdf$exerc_22 <- ifelse(exp$YPB2040 %in% c(3:5), 2, expdf$exerc_22)
-expdf$exerc_22 <- factor(expdf$exerc_22, levels=c(1:2), labels = c('> Weekly','< Weekly'))
+expdf$exerc_22 <- ifelse(exp$YPB2040 %in% c(1:3), 1, NA)
+expdf$exerc_22 <- ifelse(exp$YPB2040 %in% c(4:6), 2, expdf$exerc_22)
+expdf$exerc_22 <- factor(expdf$exerc_22, levels=c(2:1), labels = c('> Weekly','< Weekly')) #unsure not included
 
 ##Sleep
 #Has regular sleep routine
@@ -1236,11 +1236,11 @@ expdf$p_sc_gest <- factor(expdf$p_sc_gest, levels=c(1:2), labels=c('I/II','III/I
 #Household income
 expdf$hhincome_11 <- ifelse(exp$r9020 %in% c(1:5), 1, NA)
 expdf$hhincome_11 <- ifelse(exp$r9020 %in% c(6:10), 2, expdf$hhincome_11)
-expdf$hhincome_11 <- factor(expdf$hhincome_11, levels=c(2:1), labels=c('>=??360','<??360')) #each week
+expdf$hhincome_11 <- factor(expdf$hhincome_11, levels=c(2:1), labels=c('>=360','<360')) #each week
 
 expdf$hhincome_18 <- ifelse(exp$t1300 %in% c(1:5), 1, NA)
 expdf$hhincome_18 <- ifelse(exp$t1300 %in% c(6:10), 2, expdf$hhincome_18)
-expdf$hhincome_18 <- factor(expdf$hhincome_18, levels=c(2:1), labels=c('>=??2100','<??2100')) #each month
+expdf$hhincome_18 <- factor(expdf$hhincome_18, levels=c(2:1), labels=c('>=2100','<2100')) #each month
 
 #Parental education
 expdf$m_hiqual_gest <- ifelse(exp$c645 %in% c(0:3), 1, NA)
@@ -1375,7 +1375,7 @@ expdf$employst_23 <- factor(expdf$employst_23, levels=c(1:2), labels=c('Employer
 
 expdf$income_25 <- ifelse(exp$YPE6020 %in% c(1:3), 1, NA)
 expdf$income_25 <- ifelse(exp$YPE6020 %in% c(4:7), 2, expdf$income_25)
-expdf$income_25 <- factor(expdf$income_25, levels=c(1:2), labels=c('<??1500 per month','>=??1500 per month'))
+expdf$income_25 <- factor(expdf$income_25, levels=c(1:2), labels=c('<1500 per month','>=1500 per month'))
 
 #NS-SEC occupational class
 expdf$nssec_all_23 <- ifelse(exp$YPC2491 %in% c(1:3), 1, NA)

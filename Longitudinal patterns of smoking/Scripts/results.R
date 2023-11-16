@@ -67,7 +67,7 @@ rm(getallhits)
 
 #sapply(allhits$allcomp$labs, length)
 #nonsmokers occasional short_term late_onset 
-#85         90         30        161 
+#85         89         30        161 
 #sapply(lapply(allhits$allcomp$labs, function(x) unique(pltdf$grp[pltdf$labs %in% x])), length)
 #nonsmokers occasional short_term late_onset 
 #31         36         22         54
@@ -241,7 +241,7 @@ format(sapply(n_comp, nrow)/length(unique(allests$labs[allests$exclude %in% F]))
 
 
 #most exposed
-pltdf_imp <- pltdf[pltdf$labs %in% allimportant,]
+pltdf_imp <- pltdf[pltdf$labs %in% names(allimportant),]
 pltdf_imp <- pltdf_imp[order(pltdf_imp$prop_exp, decreasing=T),]
 head(pltdf_imp[,c('labs','sum','sum_exp', 'prop_exp')],20)
 

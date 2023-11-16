@@ -23,18 +23,21 @@ ests <- lapply(ests, function(x){cbind(x,text = paste("Risk factor: ", x$long_la
                                                       "\nSample size: ", x$n, "\nN Unexposed: ", x$n_unexp, "\nN Exposed: ", x$n_exp, 
                                                       "\nOR: ", x$OR, "\nLCI: ", x$LCI, "\nUCI: ", x$UCI, "\nPAF: ", x$PAF, "\n% exposed: ", x$prop_exp, 
                                                       "\nCI does not overlap null: ", x$sig, "\nSmall latent cell counts: ", x$low_cell, sep=""))})
+ests <- lapply(ests, function(x){
+  x$sub_grp <- factor(x$sub_grp, levels = c('Family smoking','Maternal cotinine in pregnancy','Peer smoking','Family substance use','Peer substance use','Family education','Parental SEP','Maternal neighbourhood deprivation','BMI and Diet','Physical activity and Sleep','Other substance use','Cotinine','Sex and Ethnicity','Education','Employment','Neighbourhood deprivation','Family mental health','Mental health and wellbeing','ACEs and Trauma','Pregnancy and parenthood'))
+  return(x)})
+
+allests$sub_grp <- factor(allests$sub_grp, levels = c('Family smoking','Maternal cotinine in pregnancy','Peer smoking','Family substance use','Peer substance use','Family education','Parental SEP','Maternal neighbourhood deprivation','BMI and Diet','Physical activity and Sleep','Other substance use','Cotinine','Sex and Ethnicity','Education','Employment','Neighbourhood deprivation','Family mental health','Mental health and wellbeing','ACEs and Trauma','Pregnancy and parenthood'))
 allests$text <- do.call('rbind',ests)$text
 
 
 
-##COLOURS
-gg_color_hue <- function(n) {
-  hues = seq(0, 360, length = n + 1)
-  hcl(h = hues, l = 65, c = 100)[1:n]
-}
-colours <- setNames(gg_color_hue(length(table(allests$sub_grp))), names(table(allests$sub_grp)))
+##COLOURS AND PCHS
+ncat <- table(allests$sub_grp)
+colours <- setNames(hcl.colors(length(ncat), palette = "Dark 3"), names(ncat))
 
 pchs <- c('Early-onset smoking' = 16, 'Late-onset smoking' = 17, 'Short-term smoking' = 15, 'Occasional smoking' = 4)
+
 
 
 ##INTERACTIVE PLOTS
@@ -43,7 +46,7 @@ explt_int <- function(df){
   df <- df[with(df, order(df$sub_grp, df$grp, df$ages)),]
   df$x <- 1:nrow(df)
   ggplot(df, aes(x = x, y = log_OR, ymin = log_LCI, ymax = log_UCI, colour = sub_grp, pch = comp_cl, size = n, text = text)) +
-    geom_point(alpha=0.75) +
+    geom_point() +
     geom_errorbar(lwd=.5, width=.1) +
     geom_hline(yintercept = 0, color = "grey40", linetype = "dashed") +
     scale_colour_manual(values = colours) +
@@ -72,13 +75,14 @@ p$C2VC5 <- explt_int(df = ests$`Early-onset smoking vs Late-onset smoking`[!ests
 
 #BY EXPOSURE GRP
 explt_int_grp <- function(df){
+  pd <- position_dodge(0.2)
   df <- df[with(df, order(df$sub_grp, df$grp, df$ages)),]
   df <- split(df, df$comparison)
   df <- lapply(df, function(x) cbind(x, 'x' = 1:nrow(x)))
   df <- do.call('rbind',df)
   ggplot(df, aes(x = x, y = log_OR, ymin = log_LCI, ymax = log_UCI, colour = sub_grp, pch = comp_cl, size = n, text = text)) +
-    geom_point(alpha=0.75) +
-    geom_errorbar(lwd=.2, width=.1) +
+    geom_point(position = pd) +
+    geom_errorbar(lwd=.2, width=.1, position = pd) +
     geom_hline(yintercept = 0, color = "grey40", linetype = "dashed") + 
     facet_wrap(vars(ref_cl), nrow=4) +
     scale_colour_manual(values = colours) +
@@ -130,7 +134,6 @@ getleg <- function(df){
 }
 leg <- getleg(allests[!allests$labs %in% exclude,])
 
-#PLOTLY AND SAVE
+#PLOTLY
 p <- lapply(p, ggplotly, tooltip="text")
 p$leg <- as_ggplot(leg)
-save(p, file='C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Longitudinal smoking/Figures/int_plts_all.rda')

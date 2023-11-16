@@ -4,7 +4,7 @@ library(haven)
 ##LABELS (N = 524)
 #evercana_10 not included
 exp_labs <- list(
-  #familial smoking
+  #Family smoking
   m_pregsmk = c('m_pre_pregsmk_gest','m_f3m_pregsmk_gest','m_l2w_pregsmk_gest','m_l2m_pregsmk_8w'),
   m_eversmk = c('m_eversmk_gest','m_eversmk_8','m_eversmk_11','m_eversmk_18','m_eversmk_22'),
   m_regsmk = c('m_regsmk_gest','m_regsmk_8w','m_regsmk_8','m_regsmk_11'),
@@ -18,7 +18,7 @@ exp_labs <- list(
   mg_smk = c('mgm_eversmk_gest','mgm_eversmk_8','mgm_eversmk_25','mgf_eversmk_gest','mgf_eversmk_8','mgf_eversmk_25','mgmm_eversmk_25','mgmf_eversmk_25','mgfm_eversmk_25','mgff_eversmk_25'),
   hh_smk = c('hh_smk_gest','hh_smk_2','hh_smk_3','hh_smk_4','hh_smk_7','hh_smk_8','hh_smk_10','hh_smk_11'),
   
-  #familial substance use
+  #Family substance use
   m_pregalc = c('m_pre_pregalc_gest','m_f3m_pregalc_gest','m_mov_pregalc_gest','m_l2m_pregalc_8w'),
   m_alc = c('m_alc_8w','m_alc_1','m_alc_2','m_alc_3','m_alc_4','m_alc_5','m_alc_7','m_alc_18','m_alc_22'),
   p_alc = c('p_alc_gest','p_alc_1','p_alc_2','p_alc_3','p_alc_4','p_alc_6','p_alc_9'),
@@ -32,7 +32,7 @@ exp_labs <- list(
   mg_alcprob = c('mgm_alcprob_gest','mgm_alcprob_8','mgf_alcprob_gest','mgf_alcprob_8'),
   mg_alcdrugdeath = c('mgm_alcprob_25','mgf_alcprob_25','mgmm_alcprob_25','mgmf_alcprob_25','mgfm_alcprob_25','mgff_alcprob_25'),
   
-  #familial mental health
+  #Family mental health
   m_edps = c('m_edps_gest_gr','m_edps_8w_gr','m_edps_1_gr','m_edps_2_gr','m_edps_3_gr','m_edps_28_gr'),
   m_mhprob = c('m_mhp_gest','m_mhp_1','m_mhp_2','m_mhp_3','m_mhp_4','m_mhp_5','m_mhp_6','m_mhp_8','m_mhp_9','m_mhp_11','m_mhp_12'),
   m_feltdepr = c('m_feltdepr_8w','m_pwk_feltdepr_8w','m_feltdepr_2'),
@@ -96,7 +96,7 @@ exp_labs <- list(
   p_econact = c('p_econ_gest','p_econ_8','p_econ_18','p_econ_22'),
   hh_income = c('hhincome_11','hhincome_18'),
   
-  #familial education
+  #Family education
   m_qual = c('m_hiqual_gest','m_qual_5','m_qual_8'),
   p_qual = c('p_hiqual_gest','p_qual_5','p_qual_8'),
   mg_qual = c('mgm_hiqual_gest','mgm_qual_8','mgf_hiqual_gest','mgf_qual_8'),
@@ -144,7 +144,7 @@ exp_labs <- list(
 labs <- unname(unlist(exp_labs))
 
 sub_labs <- list(
-  'Familial smoking' = c(
+  'Family smoking' = c(
     'm_pre_pregsmk_gest','m_f3m_pregsmk_gest','m_l2w_pregsmk_gest','m_l2m_pregsmk_8w',
     'm_eversmk_gest','m_eversmk_8','m_eversmk_11','m_eversmk_18','m_eversmk_22',
     'm_regsmk_gest','m_regsmk_8w','m_regsmk_8','m_regsmk_11',
@@ -158,7 +158,7 @@ sub_labs <- list(
     'mgm_eversmk_gest','mgm_eversmk_8','mgm_eversmk_25','mgf_eversmk_gest','mgf_eversmk_8','mgf_eversmk_25','mgmm_eversmk_25','mgmf_eversmk_25','mgfm_eversmk_25','mgff_eversmk_25',
     'hh_smk_gest','hh_smk_2','hh_smk_3','hh_smk_4','hh_smk_7','hh_smk_8','hh_smk_10','hh_smk_11'
   ),
-  'Familial substance use' = c(
+  'Family substance use' = c(
     'm_pre_pregalc_gest','m_f3m_pregalc_gest','m_mov_pregalc_gest','m_l2m_pregalc_8w',
     'm_alc_8w','m_alc_1','m_alc_2','m_alc_3','m_alc_4','m_alc_5','m_alc_7','m_alc_18','m_alc_22',
     'p_alc_gest','p_alc_1','p_alc_2','p_alc_3','p_alc_4','p_alc_6','p_alc_9',
@@ -172,7 +172,7 @@ sub_labs <- list(
     'mgm_alcprob_gest','mgm_alcprob_8','mgf_alcprob_gest','mgf_alcprob_8',
     'mgm_alcprob_25','mgf_alcprob_25','mgmm_alcprob_25','mgmf_alcprob_25','mgfm_alcprob_25','mgff_alcprob_25'
   ),
-  'Familial mental health' = c(
+  'Family mental health' = c(
     'm_edps_gest_gr','m_edps_8w_gr','m_edps_1_gr','m_edps_2_gr','m_edps_3_gr','m_edps_28_gr',
     'm_mhp_gest','m_mhp_1','m_mhp_2','m_mhp_3','m_mhp_4','m_mhp_5','m_mhp_6','m_mhp_8','m_mhp_9','m_mhp_11','m_mhp_12',
     'm_feltdepr_8w','m_pwk_feltdepr_8w','m_feltdepr_2',
@@ -182,8 +182,10 @@ sub_labs <- list(
     'mgm_mhp_gest','mgm_mhp_8','mgf_mhp_gest','mgf_mhp_8',
     'mgm_mhpdeath_25','mgf_mhpdeath_25','mgmm_mhpdeath_25','mgmf_mhpdeath_25','mgfm_mhpdeath_25','mgff_mhpdeath_25'
   ),
+  'Peer smoking' = c(
+    'friends_smk_10','friends_smk_14','friends_smk_16','friends_smk_18','friends_smk_20'
+  ),
   'Peer substance use' = c(
-    'friends_smk_10','friends_smk_14','friends_smk_16','friends_smk_18','friends_smk_20',
     'friends_alc_10','friends_alc_13','friends_alc_14','friends_alc_16','friends_alc_18','friends_alc_20','friends_drunk_20','friends_alcprob_20',
     'friends_cana_10','friends_cana_13','friends_cana_14','friends_cana_20',
     'friends_offdrug_10','friends_offdrug_13','friends_offdrug_14','friends_drug_16','friends_drug_18','friends_drug_20'
@@ -205,11 +207,13 @@ sub_labs <- list(
     'pliks_18','pliks_24','wemwbs_18_gr','wemwbs_23_gr','mhp_22','mhmeds_24','mhmeds_28'
   ),
   'BMI and Diet' = c('bmi_7_gr','bmi_9_gr','bmi_10_gr','bmi_11_gr','bmi_13_gr','bmi_14_gr','bmi_16_gr','bmi_18_gr','bmi_24_gr',
-               'totkcal_7_gr','totkcal_14_gr','foodgr_7','foodgr_14'),
+                     'totkcal_7_gr','totkcal_14_gr','foodgr_7','foodgr_14'
+  ),
   'Physical activity and Sleep' = c('mvpa3600_11','mvpa3600_14','mvpa3600_16','mvpa_24','sportclubs_11','sportclubs_13','sportclubs_14','exerc_14','exerc_17','exerc_18','exerc_22',
-                              'regslp_1','regslp_3','regslp_4','regslp_5','regslp_6','regslp_7','regslp_10','slp_wkdays_11_gr','slp_wkdays_16_gr','slp_25_gr'),
-  'Sex and Ethnicity' = c('sex',
-                    'm_ethnic','p_ethnic','ethnic'),
+                                    'regslp_1','regslp_3','regslp_4','regslp_5','regslp_6','regslp_7','regslp_10','slp_wkdays_11_gr','slp_wkdays_16_gr','slp_25_gr'
+  ),
+  'Sex and Ethnicity' = c('sex','m_ethnic','p_ethnic','ethnic'
+  ),
   'Parental SEP' = c(
     'm_marital_gest','m_marital_1','m_marital_2','m_marital_3','m_marital_4','m_marital_7','m_marital_8','m_marital_10','m_marital_18','m_marital_22',
     'm_homown_gest','m_homown_1','m_homown_3','m_homown_5','m_homown_7','m_homown_10','m_homown_18','m_homown_22',
@@ -218,7 +222,7 @@ sub_labs <- list(
     'p_econ_gest','p_econ_8','p_econ_18','p_econ_22',
     'hhincome_11','hhincome_18'
   ),
-  'Familial education' = c(
+  'Family education' = c(
     'm_hiqual_gest','m_qual_5','m_qual_8',
     'p_hiqual_gest','p_qual_5','p_qual_8',
     'mgm_hiqual_gest','mgm_qual_8','mgf_hiqual_gest','mgf_qual_8'
@@ -235,22 +239,27 @@ sub_labs <- list(
     'employst_23','nssec_all_23','nssec_5_23',
     'emply_25','shiftwrk_25','nightwrk_25'
   ),
-  'Neighbourhood deprivation' = c( 
+  'Maternal neighbourhood deprivation' = c( 
     'hoodqual_gest','hoodstress_2','hoodstress_3',
     'm_urbrur_12w_gest','m_urbrur_18w_gest','m_urbrur_32w_gest','m_urbrur_8to42w_gest','m_urbrur_8w','m_urbrur_1','m_urbrur_2','m_urbrur_3','m_urbrur_4','m_urbrur_7','m_urbrur_8','m_urbrur_9','m_urbrur_10','m_urbrur_11','m_urbrur_12','m_urbrur_18',
     'm_townsend_12w_gest','m_townsend_18w_gest','m_townsend_32w_gest','m_townsend_8to42w_gest','m_townsend_8w','m_townsend_1','m_townsend_2','m_townsend_3','m_townsend_4','m_townsend_5','m_townsend_6','m_townsend_7','m_townsend_8','m_townsend_9','m_townsend_10','m_townsend_11','m_townsend_12','m_townsend_18',
-    'm_IMD_12w_gest','m_IMD_18w_gest','m_IMD_32w_gest','m_IMD_8to42w_gest','m_IMD_8w','m_IMD_1','m_IMD_2','m_IMD_3','m_IMD_5','m_IMD_6','m_IMD_7','m_IMD_8','m_IMD_9','m_IMD_10','m_IMD_11','m_IMD_18',
-    #"NEED TO SEPERATE MATERNAL AND PARTICIPANT DEPRIVATION MEASURES TO MATCH PAPER!
+    'm_IMD_12w_gest','m_IMD_18w_gest','m_IMD_32w_gest','m_IMD_8to42w_gest','m_IMD_8w','m_IMD_1','m_IMD_2','m_IMD_3','m_IMD_5','m_IMD_6','m_IMD_7','m_IMD_8','m_IMD_9','m_IMD_10','m_IMD_11','m_IMD_18'
+  ),
+  'Neighbourhood deprivation' = c(
     'urbrur_ccb_8','urbrur_ccc_8','urbrur_ccd_9','urbrur_cce_9','urbrur_ccf_10','urbrur_ccg_10','urbrur_11','urbrur_cck_12','urbrur_ccl_12','urbrur_ccm_13','urbrur_ccn_13','urbrur_ccp_14','urbrur_ccq_14','urbrur_ccr_14','urbrur_17','urbrur_18','urbrur_20',
     'townsend_ccb_8','townsend_ccc_8','townsend_ccd_9','townsend_cce_9','townsend_ccf_10','townsend_ccg_10','townsend_11','townsend_cck_12','townsend_ccl_12','townsend_ccm_13','townsend_ccn_13','townsend_ccp_14','townsend_ccq_14','townsend_ccr_14','townsend_17','townsend_18','townsend_20',
     'IMD_ccb_8','IMD_ccc_8','IMD_ccd_9','IMD_cce_9','IMD_ccf_10','IMD_ccg_10','IMD_11','IMD_cck_12','IMD_ccl_12','IMD_ccm_13','IMD_ccn_13','IMD_ccp_14','IMD_ccq_14','IMD_ccr_14','IMD_17','IMD_18','IMD_20'
   ),
-  'ACEs and Trauma' = c('aces_catcl0to16','aces_sccl0to16','aces_catex0to16','aces_scex0to16',
-                  'trauma0to5','trauma5to11','trauma11to17','trauma0to17'
+  'ACEs and Trauma' = c(
+    'aces_catcl0to16','aces_sccl0to16','aces_catex0to16','aces_scex0to16',
+                        'trauma0to5','trauma5to11','trauma11to17','trauma0to17'
   ),
-  'Cotinine' = c('m_cotinine_trim1_gest_gr','m_cotinine_trim3_gest_gr',
-                 #"NEED TO SEPERATE MATERNAL AND PARTICIPANT DEPRIVATION MEASURES TO MATCH PAPER!
-                 'cotinine_7_gr','cotinine_16_gr','cotinine_18_gr'),
+  'Maternal cotinine in pregnancy' = c(
+    'm_cotinine_trim1_gest_gr','m_cotinine_trim3_gest_gr'
+  ),
+  'Cotinine' = c(
+    'cotinine_7_gr','cotinine_16_gr','cotinine_18_gr'
+  ),
   'Pregnancy and parenthood' = c(
     'everpreg_17','everpreg_21','everpreg_22','everpreg_24',
     'npregs_21','baby_22','baby_24','currpreg_20','currpreg_21','currpreg_23',
@@ -262,15 +271,15 @@ sub_labs <- list(
 
 ##LONG LABELS
 long_labs <- list(
-  #familial smoking
+  #family smoking
   'Mum smoked before pregnancy' = c('m_pre_pregsmk_gest'),
   'Mum smoked first 3m pregnancy' = c('m_f3m_pregsmk_gest'),
   'Mum smoked last 2w pregnancy' = c('m_l2w_pregsmk_gest'),
   'Mum smoked last 2m pregnancy' = c('m_l2m_pregsmk_8w'),
   'Mum ever smoked' = c('m_eversmk_gest','m_eversmk_8','m_eversmk_11','m_eversmk_18','m_eversmk_22'),
   'Mum regularly smoked' = c('m_regsmk_gest','m_regsmk_8w','m_regsmk_8','m_regsmk_11'),
-  'Mum currently smokes' = c('m_currsmk_18','m_currsmk_22'),
-  'Mum smokes daily' = c('m_dailsmk_8w','m_dailsmk_1','m_dailsmk_2','m_dailsmk_3','m_dailsmk_4','m_dailsmk_5','m_dailsmk_6','m_dailsmk_7','m_dailsmk_12','m_dailsmk_18','m_dailsmk_22'),
+  'Mum currently smoked' = c('m_currsmk_18','m_currsmk_22'),
+  'Mum smoked daily' = c('m_dailsmk_8w','m_dailsmk_1','m_dailsmk_2','m_dailsmk_3','m_dailsmk_4','m_dailsmk_5','m_dailsmk_6','m_dailsmk_7','m_dailsmk_12','m_dailsmk_18','m_dailsmk_22'),
   'Mum stopped smoking' = c('m_stopsmk_8','m_stopsmk_11'),
   'Time since mum quit smoking' = c('m_quitsmk_8','m_quitsmk_11','m_quitsmk_18','m_quitsmk_22'),
   'Mum partner smokes' = c('p_smk_gest','p_smk_8','p_smk_11'),
@@ -287,7 +296,7 @@ long_labs <- list(
   'MGFF smoked' = c('mgff_eversmk_25'),
   'Household members smoke' = c('hh_smk_gest','hh_smk_2','hh_smk_3','hh_smk_4','hh_smk_7','hh_smk_8','hh_smk_10','hh_smk_11'),
   
-  #familial substance use
+  #family substance use
   'Mum alcohol intake before pregnancy' = c('m_pre_pregalc_gest'),
   'Mum alcohol intake first 3m pregnancy' = c('m_f3m_pregalc_gest'),
   'Mum alcohol intake since baby moved' = c('m_mov_pregalc_gest'),
@@ -314,7 +323,7 @@ long_labs <- list(
   'MGFM death alcohol or drugs' = c('mgfm_alcprob_25'),
   'MGFF death alcohol or drugs' = c('mgff_alcprob_25'),
   
-  #familial mental health
+  #family mental health
   'Mum EDPS score' = c('m_edps_gest_gr','m_edps_8w_gr','m_edps_1_gr','m_edps_2_gr','m_edps_3_gr','m_edps_28_gr'),
   'Mum mental health problem' = c('m_mhp_gest','m_mhp_1','m_mhp_2','m_mhp_3','m_mhp_4','m_mhp_5','m_mhp_6','m_mhp_8','m_mhp_9','m_mhp_11','m_mhp_12'),
   'Mum felt depressed since birth' = c('m_feltdepr_8w'),
@@ -331,7 +340,7 @@ long_labs <- list(
   'MGMF death mental health problem' = c('mgmf_mhpdeath_25'),
   'MGFM death mental health problem' = c('mgfm_mhpdeath_25'),
   'MGFF death mental health problem' = c('mgff_mhpdeath_25'),
-
+  
   #peer substance use
   'Friends smoke cigarettes' = c('friends_smk_10','friends_smk_14','friends_smk_16','friends_smk_18','friends_smk_20'),
   'Friends drink alcohol' = c('friends_alc_10','friends_alc_13','friends_alc_14','friends_alc_16','friends_alc_18','friends_alc_20','friends_drunk_20'),
@@ -348,7 +357,7 @@ long_labs <- list(
   'Cannabis use' = c('evercana_13','evercana_C_14','evercana_Q_14','evercana_16','evercana_17','evercana_C_18','evercana_Q_18','evercana_20','evercana_22','evercana_24','evercana_28'),
   'Been offered drugs' = c('everoffdrug_10','everoffdrug_13','everoffdrug_14'),
   'Drug use' = c('everdrug_13','everdrug_14','drug_16','drug_17','drug_C_18','drug_Q_18','drug_20','drug_22','drug_24'),
-
+  
   #mental health and wellbeing
   'DAWBA: ADHD disorder' = c('dawba_ADHD_8'),
   'DAWBA: Conduct disorder' = c('dawba_oppconductdis_8'),
@@ -406,7 +415,7 @@ long_labs <- list(
   'Mum partner economic activity' = c('p_econ_gest','p_econ_8','p_econ_18','p_econ_22'),
   'Household income' = c('hhincome_11','hhincome_18'),
   
-  #familial education
+  #Family education
   'Mum qualifications' = c('m_hiqual_gest','m_qual_5','m_qual_8'),
   'Mum partner qualifications' = c('p_hiqual_gest','p_qual_5','p_qual_8'),
   'MGM education' = c('mgm_hiqual_gest','mgm_qual_8'),
@@ -507,14 +516,12 @@ pltdf$ages_sub <- factor(pltdf$ages_sub, levels=c('Gestation','Early Childhood',
 
 #REGRP LABELS (!NEED TO CHANGE TO MATCH PAPER!)
 pltdf$lab_grp <- pltdf$sub_grp
-pltdf$lab_grp[pltdf$lab_grp %in% c('Familial smoking','Familial substance use')] <- 'Familial substance use'
-pltdf$lab_grp[pltdf$lab_grp %in% c('Familial education','Parental SEP','Familial mental health')] <- 'Familial sociodemographics'
-pltdf$lab_grp[pltdf$lab_grp %in% c('Sex and Ethnicity','Education','Employment','Neighbourhood deprivation')] <- 'Sociodemographic factors'
-pltdf$lab_grp[pltdf$lab_grp %in% c('BMI and Diet','Physical activity and Sleep','Other substance use','Peer substance use')] <- 'Lifestyle factors'
-pltdf$lab_grp[pltdf$lab_grp %in% c('Mental health and wellbeing','ACEs and Trauma','Pregnancy and parenthood','Cotinine')] <- 'Mental health and other factors'
-pltdf$lab_grp[grep('m_urbrur',pltdf$labs)] <- 'Familial sociodemographics'
-pltdf$lab_grp[grep('m_IMD',pltdf$labs)] <- 'Familial sociodemographics'
-pltdf$lab_grp[grep('m_townsend',pltdf$labs)] <- 'Familial sociodemographics'
+pltdf$lab_grp[pltdf$lab_grp %in% c('Family smoking','Maternal cotinine in pregnancy','Peer smoking')] <- 'Family and peer smoking'
+pltdf$lab_grp[pltdf$lab_grp %in% c('Family substance use','Peer substance use')] <- 'Family and peer substance use'
+pltdf$lab_grp[pltdf$lab_grp %in% c('Family education','Parental SEP','Maternal neighbourhood deprivation')] <- 'Family sociodemographic factors'
+pltdf$lab_grp[pltdf$lab_grp %in% c('Other substance use','BMI and Diet','Physical activity and Sleep')] <- 'Individual lifestyle factors'
+pltdf$lab_grp[pltdf$lab_grp %in% c('Sex and Ethnicity','Education','Employment','Neighbourhood deprivation')] <- 'Individual sociodemographic factors'
+pltdf$lab_grp[pltdf$lab_grp %in% c('Family mental health','Mental health and wellbeing','ACEs and Trauma','Pregnancy and parenthood','Cotinine')] <- 'Mental health and other factors'
 
 #LONG LABS
 pltdf$long_labs <- rep(names(long_labs),times=lengths(long_labs))[match(labs,unlist(long_labs))]
