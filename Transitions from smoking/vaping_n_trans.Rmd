@@ -1,0 +1,314 @@
+---
+title: "Discrete time survival analysis - transitions from smoking to e-cigarette use/non-use in ALSPAC"
+author: "Alexandria Andrayas"
+date: "05/02/2024"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = FALSE)
+```
+
+```{r load-packages}
+library(haven)
+library(labelled)
+library(sticky)
+library(ggplot2)
+library(gtsummary)
+library(dplyr)
+```
+
+# Load data, define labels, check sample size
+
+```{r data-labs-samp-size}
+# set up data
+subdf <- read_dta('//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/vaping_sub_measures.dta')
+subdf <- to_factor(subdf, sort_levels='auto')
+subdf <- data.frame(subdf)
+subdf <- sticky_all(subdf)
+subdf$id <- 1:nrow(subdf)
+
+load('//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/vaping_impdfs.rda')
+impdfs <- lapply(impdfs, function(x){
+  x[,'id'] <- 1:nrow(x)
+  return(x)
+})
+
+#n first events
+table(subdf$firstevent)
+impns <- lapply(impdfs, function(x) table(x$firstevent))
+getns <- function(){
+  out <- list('Censored' = list(),'Dual use' = list(),'Exclusive e-cigarette use' = list(),'Non-use' = list())
+  for(i in names(out)){
+    for(j in 1:length(impns)){
+      out[[i]][[j]] <- impns[[j]][i]
+    }
+    out[[i]] <- unlist(out[[i]])
+    out[[i]] <- range(out[[i]])
+  }
+  return(out)
+}
+impns <- getns()
+
+# outcomes
+outcomes <- c('nonuse', 'ecig', 'exclecig', 'dual')
+anyoutcomes <- c('anynonuse', 'anyexclecig', 'anydual')
+
+# 5 timepoints
+vaps <- c('vap22', 'vap23', 'vap24', 'vap28', 'vap30')
+
+# derive "any" outcomes (not first event, independant of time)
+getanyoutcome <- function(df, outcome, varlab){
+  df[,paste0('any',varlab)] <- NA
+  df[,paste0('timetofirst',varlab)] <- NA
+  df[,paste0('timetolast',varlab)] <- NA
+  for(i in 1:nrow(df)){
+    df[i,paste0('any',varlab)] <- ifelse((df$vap22[i] %in% outcome | 
+                                          df$vap23[i] %in% outcome | 
+                                          df$vap24[i] %in% outcome | 
+                                          df$vap28[i] %in% outcome | 
+                                          df$vap30[i] %in% outcome), 1, 0)
+    
+    df[i,paste0('timetofirst',varlab)] <- ifelse(df$vap22[i] %in% outcome, 1,
+                                          ifelse(df$vap23[i] %in% outcome, 2, 
+                                          ifelse(df$vap24[i] %in% outcome, 3, 
+                                          ifelse(df$vap28[i] %in% outcome, 4, 
+                                          ifelse(df$vap30[i] %in% outcome, 5, NA)))))
+    
+    df[i,paste0('timetolast',varlab)] <- ifelse(df$vap30[i] %in% outcome, 5,
+                                         ifelse(df$vap28[i] %in% outcome, 4, 
+                                         ifelse(df$vap24[i] %in% outcome, 3, 
+                                         ifelse(df$vap23[i] %in% outcome, 2, 
+                                         ifelse(df$vap22[i] %in% outcome, 1, NA)))))
+  }
+  return(df)
+}
+
+rungetanyoutcome <- function(df){
+  df <- getanyoutcome(df, 'Non-use', 'nonuse')
+  df <- getanyoutcome(df, 'Exclusive e-cigarette use', 'exclecig')
+  df <- getanyoutcome(df, 'Dual use', 'dual')
+  df <- getanyoutcome(df, 'Exclusive smoking', 'smk')
+  return(df)
+}
+subdf <- rungetanyoutcome(subdf)
+impdfs <- lapply(impdfs, rungetanyoutcome)
+
+# get all reported events
+getwhenoutcomes <- function(df){
+  out <- list()
+  for(i in 1:nrow(df)){
+    out[[i]] <- data.frame(time = 1:5, smk = NA, dual = NA, exclecig = NA, nonuse = NA)
+    for(k in 1:5){
+      var <- vaps[k]
+      out[[i]][out[[i]]$time %in% k,'smk'] <- ifelse(df[i, var] %in% 'Exclusive smoking', T, F)
+      out[[i]][out[[i]]$time %in% k,'dual'] <- ifelse(df[i, var] %in% 'Dual use', T, F)
+      out[[i]][out[[i]]$time %in% k,'exclecig'] <- ifelse(df[i, var] %in% 'Exclusive e-cigarette use', T, F)
+      out[[i]][out[[i]]$time %in% k,'nonuse'] <- ifelse(df[i, var] %in% 'Non-use', T, F)
+    }
+  }
+  return(out)
+}
+allmat <- getwhenoutcomes(subdf)
+allmat_imp <- lapply(impdfs, getwhenoutcomes)
+
+gettranstimes <- function(df){
+  out <- lapply(df[-1], function(x) df$time[x %in% T])
+  out <- out[lapply(out,length)>0]
+  return(out)
+}
+allmat <- lapply(allmat, gettranstimes)
+allmat_imp <- lapply(allmat_imp, function(x) lapply(x, gettranstimes))
+
+rm(getanyoutcome, getwhenoutcomes, gettranstimes, rungetanyoutcome, getns)
+```
+
+# Number of all possible transitions
+
+```{r n-transitions}
+#any outcomes
+sapply(subdf[,anyoutcomes], table)
+#  anynonuse anyexclecig anydual
+#0       426         739     665
+#1       432         119     193
+
+#ns for each event
+getnpercat <- function(df){
+    df$nvaps <- rowSums(sapply(subdf[,vaps], function(x) !is.na(x)))
+  df$n_smk <- rowSums(sapply(subdf[,vaps], function(x) x %in% 'Exclusive smoking'))
+    df$n_dual <- rowSums(sapply(subdf[,vaps], function(x) x %in% 'Dual use'))
+  df$n_exclecig <- rowSums(sapply(subdf[,vaps], function(x) x %in% 'Exclusive e-cigarette use'))
+    df$n_nonuse <- rowSums(sapply(subdf[,vaps], function(x) x %in% 'Non-use'))
+    return(df)
+}
+subdf <- getnpercat(subdf)
+rm(getnpercat)
+
+#number of participants per N transitions
+subdf$nevents <- rowSums(subdf[,anyoutcomes])
+table(subdf$nevents)
+#   0   1   2   3 
+# 252 481 112  13
+481+(112*2)+(13*3)
+
+impdfs <- lapply(impdfs, function(x){
+  x$nevents <- rowSums(x[,anyoutcomes])
+  return(x)
+})
+impnevents <- lapply(impdfs, function(x) table(x$nevents))
+getnevents <- function(){
+  out <- list('0' = list(),'1' = list(),'2' = list(),'3' = list())
+  for(i in names(out)){
+    for(j in 1:length(impnevents)){
+      out[[i]][[j]] <- impnevents[[j]][i]
+    }
+    out[[i]] <- unlist(out[[i]])
+    out[[i]] <- range(out[[i]])
+  }
+  return(out)
+}
+impnevents <- getnevents()
+rm(getnevents)
+
+#derive transitions
+gettrans <- function(from,to,data){
+
+  event <- c('smk','dual','exclecig','nonuse')
+  #get index for competing events to consider
+  ignind1 <- which(!event %in% c(from,to))[1]
+  ignind2 <- which(!event %in% c(from,to))[2]
+  
+  if(length(data[[from]]) %in% 1 & length(data[[to]]) %in% 1){
+    data <- data
+  } else if(length(data[[from]]) %in% 1 & length(data[[to]]) > 1){
+    data[[to]] <- data[[to]][data[[to]] > data[[from]]]
+    data[[to]] <- data[[to]][length(data[[to]])]
+  } else if(length(data[[from]]) > 1 & length(data[[to]]) %in% 1){
+    data[[from]] <- data[[from]][data[[from]] < data[[to]]]
+    data[[from]] <- data[[from]][length(data[[from]])]
+  } else if(length(data[[from]]) > 1 & length(data[[to]]) > 1){
+    data[[from]] <- data[[from]][1]
+    data[[to]] <- data[[to]][sapply(data[[from]], function(x) x < data[[to]])]
+    data[[to]] <- data[[to]][length(data[[to]])]
+  }
+
+  (from %in% names(data)) & (to %in% names(data)) & !(event[ignind1] %in% names(data)) & !(event[ignind2] %in% names(data)) & 
+    ('TRUE' %in% sapply(data[[from]], function(x) x < data[[to]])) |
+ 
+  (from %in% names(data)) & (to %in% names(data)) & (event[ignind1] %in% names(data)) & !(event[ignind2] %in% names(data)) & 
+    ('TRUE' %in% sapply(data[[from]], function(x) x < data[[to]])) & 
+    !('TRUE' %in% sapply(data[[event[ignind1]]], function(x) x < data[[to]] & x > data[[from]])) | 
+    
+  (from %in% names(data)) & (to %in% names(data)) & !(event[ignind1] %in% names(data)) & (event[ignind2] %in% names(data)) & 
+    ('TRUE' %in% sapply(data[[from]], function(x) x < data[[to]])) & 
+    !('TRUE' %in% sapply(data[[event[ignind2]]], function(x) x < data[[to]] & x > data[[from]])) | 
+    
+  (from %in% names(data)) & (to %in% names(data)) & (event[ignind1] %in% names(data)) & (event[ignind2] %in% names(data)) & 
+    ('TRUE' %in% sapply(data[[from]], function(x) x < data[[to]])) & 
+    !('TRUE' %in% sapply(data[[event[ignind1]]], function(x) x < data[[to]] & x > data[[from]])) & 
+    !('TRUE' %in% sapply(data[[event[ignind2]]], function(x) x < data[[to]] & x > data[[from]])) 
+}
+
+rungettrans <- function(df){
+  trans <- data.frame()[1:length(df),]
+  rownames(trans) <- 1:length(df)
+  trans$smktodual <- sapply(df, function(x) gettrans('smk','dual',x))
+  trans$smktoexclecig <- sapply(df, function(x) gettrans('smk','exclecig',x))
+  trans$smktononuse <- sapply(df, function(x) gettrans('smk','nonuse',x))
+  trans$dualtosmk <- sapply(df, function(x) gettrans('dual','smk',x))
+  trans$dualtoexclecig <- sapply(df, function(x) gettrans('dual','exclecig',x))
+  trans$dualtononuse <- sapply(df, function(x) gettrans('dual','nonuse',x))
+  trans$exclecigtosmk <- sapply(df, function(x) gettrans('exclecig','smk',x))
+  trans$exclecigtodual <- sapply(df, function(x) gettrans('exclecig','dual',x))
+  trans$exclecigtononuse <- sapply(df, function(x) gettrans('exclecig','nonuse',x))
+  trans$nonusetosmk <- sapply(df, function(x) gettrans('nonuse','smk',x))
+  trans$nonusetodual <- sapply(df, function(x) gettrans('nonuse','dual',x))
+  trans$nonusetoexclecig <- sapply(df, function(x) gettrans('nonuse','exclecig',x))
+  return(trans)
+}
+trans <- rungettrans(allmat)
+rm(rungettrans,gettrans)
+
+#remove first events
+table(trans$smktodual) #108
+table(trans$smktoexclecig) #51
+table(trans$smktononuse) #237
+
+table(trans$smktodual & subdf$firstevent %in% 'Dual use') #100
+table(trans$smktoexclecig & subdf$firstevent %in% 'Exclusive e-cigarette use') #39
+table(trans$smktononuse & subdf$firstevent %in% 'Non-use') #225
+
+trans$smktodual <- ifelse(trans$smktodual & subdf$firstevent %in% 'Dual use' & subdf$nevents %in% 1 & trans$dualtosmk %in% F, F, trans$smktodual)
+
+trans$smktoexclecig <- ifelse(trans$smktoexclecig & subdf$firstevent %in% 'Exclusive e-cigarette use' & subdf$nevents %in% 1 & trans$exclecigtosmk %in% F, F, trans$smktoexclecig)
+
+trans$smktononuse <- ifelse(trans$smktononuse & subdf$firstevent %in% 'Non-use' & subdf$nevents %in% 1 & trans$nonusetosmk %in% F, F, trans$smktononuse)
+
+table(trans$smktodual) #58
+table(trans$smktoexclecig) #20
+table(trans$smktononuse) #126
+
+trans$smktodual <- ifelse(trans$smktodual & subdf$firstevent %in% 'Dual use' & (subdf$n_smk %in% 1 | subdf$n_dual %in% 1), F, trans$smktodual)
+
+trans$smktoexclecig <- ifelse(trans$smktoexclecig & subdf$firstevent %in% 'Exclusive e-cigarette use' & (subdf$n_smk %in% 1 | subdf$n_exclecig %in% 1), F, trans$smktoexclecig)
+
+trans$smktononuse <- ifelse(trans$smktononuse & subdf$firstevent %in% 'Non-use' & (subdf$n_smk %in% 1 | subdf$n_nonuse %in% 1), F, trans$smktononuse)
+
+trans$smktodual[418] <- F
+trans$smktononuse[c(74,88,102,318,320,338,353,428,469,581)] <- F
+
+table(trans$smktodual) #19
+table(trans$smktoexclecig) #13
+table(trans$smktononuse) #38
+
+table(trans$smktodual & subdf$firstevent %in% 'Dual use') #11
+table(trans$smktoexclecig & subdf$firstevent %in% 'Exclusive e-cigarette use') #1
+table(trans$smktononuse & subdf$firstevent %in% 'Non-use') #26
+
+#n per transition, without first events
+sapply(trans, table)['TRUE',]
+sum(sapply(trans, table)['TRUE',]) #397
+
+##assign first events
+#trans$smktodual[subdf$firstevent %in% 'Dual use'] <- TRUE
+#trans$smktoexclecig[subdf$firstevent %in% 'Exclusive e-cigarette use'] <- TRUE
+#trans$smktononuse[subdf$firstevent %in% 'Non-use'] <- TRUE
+#sapply(trans, table)['TRUE',]
+#sum(sapply(trans, table)['TRUE',]) #965
+
+##n per transition
+#subdf$ntrans <- rowSums(trans)
+#table(subdf$ntrans)
+
+# convert to matrix
+gettransmat <- function(df){
+  mat <- matrix(ncol=4,nrow=4)
+  colnames(mat) <- c('smk','dual','exclecig','nonuse')
+  rownames(mat) <- c('smk','dual','exclecig','nonuse')
+  for(i in rownames(mat)){
+    for(j in colnames(mat)){
+      if(i == j){
+        mat[i,j] <- NA
+      } else{
+        mat[i,j] <- sum(df[,paste0(i,'to',j)])
+      }
+    }
+  }
+  return(mat)
+}
+transmat <- gettransmat(trans)
+
+#check transitions are correct
+subdf[subdf$ntrans %in% c(4,5),c(vaps,'ntrans','nevents')]
+trans[rownames(subdf[subdf$ntrans %in% c(4,5),]),]
+
+#total number of transitions
+sum(sapply(trans, table)['TRUE',])
+
+#table n transitions by n different reported events
+table(subdf$nevents, subdf$ntrans)
+```

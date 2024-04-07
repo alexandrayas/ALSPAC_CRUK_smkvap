@@ -1,0 +1,427 @@
+---
+title: "Publication plots - transitions from smoking to e-cigarette use/non-use in ALSPAC"
+author: "Alexandria Andrayas"
+date: "29/01/2024"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+editor_options: 
+  chunk_output_type: console
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Load packages and get data
+```{r load-packages}
+library(ggplot2)
+library(haven)
+library(labelled)
+library(sticky)
+library(dplyr)
+library(gtsummary)
+library(ggpubr)
+library(extrafont)
+#font_import()
+#loadfonts(device="win")
+
+# set up data
+subdf <- read_dta('//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/vaping_sub_measures.dta')
+subdf <- to_factor(subdf, sort_levels='auto')
+subdf <- data.frame(subdf)
+subdf <- sticky_all(subdf)
+subdf$id <- 1:nrow(subdf)
+
+# 4 baseline exposures
+baseline_exp <- c('sex', 'ethnicity', 'hhincome_11', 'parent_dailsmk_12')
+
+# 11 main exposures
+main_exp <- c('bmi_18_gr', 'exerc_18', 'qual_20', 'bingalc_20', 'cana_20', 'drug_20', 'friends_smk_20', 'mfq_21_gr', 'townsend_21_gr', 'parent_21', 'freqsmk_21')
+
+# 5 timepoints
+vaps <- c('vap22', 'vap23', 'vap24', 'vap28', 'vap30')
+
+load('//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/vaping_impdfs.rda')
+impdfs <- lapply(impdfs, function(x){
+  x[,'id'] <- 1:nrow(x)
+  return(x)
+})
+```
+
+
+# Descriptive stats table
+
+```{r desc-stats}
+desc_tab <- tbl_summary(subdf[, c(baseline_exp, main_exp)], statistic=all_continuous() ~ "{mean} ({sd})") %>%
+  bold_labels() %>%
+  italicize_levels()
+
+desc_tab |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/descstats_pub_tab.docx')
+
+```
+
+# Box plots
+
+```{r box-plts}
+p <- list()
+
+#ns categories by timepoint
+
+##with missing
+ns <- data.frame(n = as.vector(sapply(subdf[,vaps], table)), 
+                 cat = rep(c('Exclusive smoking','Dual use','Exclusive e-cig use','Non-use'), 5),
+                 time = rep(c(22,23,24,28,30), each=4))
+ns$cat <- factor(ns$cat, levels=c('Exclusive smoking','Dual use','Exclusive e-cig use','Non-use'))
+
+p$ncat <- ggplot(ns, aes(x = time, y = n, fill = cat)) +
+  geom_bar(stat="identity", position = 'dodge', colour = 'black') +
+  labs(tag = 'A', x = '\nTimepoint', y = 'N\n', fill = '') +
+  theme_bw() +
+  theme(plot.title = element_text(face="bold", hjust=0.5), 
+        legend.position = 'bottom', 
+        legend.spacing.x = unit(5, 'cm'), 
+        text=element_text(size=20, family = 'Times New Roman'), 
+        axis.text.y = element_text(face="bold"), 
+        axis.text.x = element_text(face="bold")) +
+  scale_x_continuous(breaks=seq(22,30,1)) +
+  scale_y_continuous(limits=c(0,450), breaks=seq(0,450,50)) +
+  scale_fill_manual(values=c("grey30", "grey50", "grey70", "grey90")) +
+  guides(fill = guide_legend(byrow = TRUE), colour = 'none')
+
+## imputed
+impns <- lapply(impdfs, function(x) lapply(x[,vaps], table))
+
+getimpns <- function(df){
+  
+  list <- list('Exclusive smoking' = list(), 'Dual use' = list(), 'Exclusive e-cigarette use' = list(), 'Non-use' = list())
+  
+  for(i in names(list)){
+    for(j in c('vap22','vap23','vap24','vap28','vap30') ){
+      for(k in 1:100){
+          list[[i]][[j]][[k]] <- df[[k]][[j]][i]
+          }
+        list[[i]][[j]] <- unlist(list[[i]][[j]])
+        }}
+  rm(i,j,k)
+  
+  out <- data.frame(cat = rep(names(list),each = 5),
+                    time = rep(c('vap22','vap23','vap24','vap28','vap30'), 4),
+                    median = NA, min = NA, max = NA)
+  
+  for(i in names(list)){
+    for(j in c('vap22','vap23','vap24','vap28','vap30')){
+        out[out$cat %in% i & out$time %in% j, 'min'] <- min(list[[i]][[j]])
+        out[out$cat %in% i & out$time %in% j, 'max'] <- max(list[[i]][[j]])
+        out[out$cat %in% i & out$time %in% j, 'median'] <- median(list[[i]][[j]])
+      }}
+  
+  out$time <- recode(out$time, 'vap22' = 22, 'vap23' = 23, 'vap24' = 24, 'vap28' = 28, 'vap30' = 30)
+  out$cat <- factor(out$cat, levels=c('Exclusive smoking','Dual use','Exclusive e-cigarette use','Non-use'))
+  return(out)
+}
+impns <- getimpns(impns)
+impns
+
+p$imp_ncat <- ggplot(data=impns, aes(x=time, y=median, fill=cat, ymin=min, ymax=max)) +
+  geom_bar(stat="identity", position = position_dodge(0.8), colour = 'black', width = 0.8) +
+  geom_errorbar(position = position_dodge(0.8), width = 0.5) +
+  labs(tag = 'A', x = '\nTimepoint', y = 'N\n', fill = '') +
+  theme_bw() +
+  theme(plot.title = element_text(face="bold", hjust=0.5), 
+        legend.position = 'bottom', 
+        legend.spacing.x = unit(5, 'cm'), 
+        text=element_text(size=20, family = 'Times New Roman'), 
+        axis.text.y = element_text(face="bold"), 
+        axis.text.x = element_text(face="bold")) +
+  scale_x_continuous(breaks=seq(22,30,1)) +
+  scale_y_continuous(limits=c(0,600), breaks=seq(0,600,100)) +
+  scale_fill_manual(values=c("grey30", "grey50", "grey70", "grey90")) +
+  guides(fill = guide_legend(byrow = TRUE), colour = 'none')
+
+
+# ns per time-to-event and event
+
+## with missing
+timetos <- data.frame(n = as.vector(do.call('cbind',tapply(subdf$timeto, subdf$firstevent, table))),
+                      event = rep(c('Censored','Dual use','Exclusive e-cigarette use','Non-use'),each=5),
+                      time = rep(c(22,23,24,28,30), 4))
+
+p$events <- ggplot(data=timetos[!timetos$event %in% 'Censored',], aes(x=time, y=n, fill=event)) +
+  geom_bar(stat="identity", position = 'dodge', colour = 'black') +
+  labs(tag = 'B', x = '\nTimepoint', y = 'N\n', fill = '') +
+  theme_bw() +
+  theme(plot.title = element_text(face="bold", hjust=0.5), 
+        legend.position = 'bottom', 
+        legend.spacing.x = unit(5, 'cm'), 
+        text=element_text(size=20, family = 'Times New Roman'), 
+        axis.text.y = element_text(face="bold"), 
+        axis.text.x = element_text(face="bold")) +
+  scale_x_continuous(breaks=seq(22,30,1)) +
+  scale_y_continuous(limits=c(0,180), breaks=seq(0,180,20)) +
+  scale_fill_manual(values=c("grey50", "grey70", "grey90")) +
+  guides(fill = guide_legend(byrow = TRUE), colour = 'none')
+
+p$censored <- ggplot(data=timetos[timetos$event %in% 'Censored',], aes(x=time, y=n, fill=event)) +
+  geom_bar(stat="identity", position = 'dodge', colour = 'black') +
+  labs(tag = 'C', x = '\nTimepoint', y = 'N\n', fill = '') +
+  theme_bw() +
+  theme(plot.title = element_text(face="bold", hjust=0.5), 
+        legend.position = 'bottom', 
+        legend.spacing.x = unit(5, 'cm'), 
+        text=element_text(size=20, family = 'Times New Roman'), 
+        axis.text.y = element_text(face="bold"), 
+        axis.text.x = element_text(face="bold")) +
+  scale_x_continuous(breaks=seq(22,30,1)) +
+  scale_y_continuous(limits=c(0,80), breaks=seq(0,80,10)) +
+  scale_fill_manual(values=c("grey30")) +
+  guides(fill = guide_legend(byrow = TRUE), colour = 'none')
+
+## imputed
+imptimetos <- lapply(impdfs, function(x) tapply(x$timeto, x$firstevent, table))
+
+getimptimetos <- function(df){
+  
+  list <- list('Censored' = list(), 'Dual use' = list(), 'Exclusive e-cigarette use' = list(), 'Non-use' = list())
+  
+  for(i in names(list)){
+    for(j in c('1','2','3','7','9')){
+      for(k in 1:100){
+        if(j %in% names(df[[k]][[i]])){
+          list[[i]][[j]][[k]] <- df[[k]][[i]][j]
+          }
+        list[[i]][[j]] <- unlist(list[[i]][[j]])
+        }}}
+  rm(i,j,k)
+  
+  out <- data.frame(event = rep(names(list),each = 5),
+                    time = rep(c('1','2','3','7','9'), 4),
+                    median = NA, min = NA, max = NA)
+  
+  for(i in names(list)){
+    for(j in c('1','2','3','7','9')){
+      if(j %in% names(list[[i]])){
+        out[out$event %in% i & out$time %in% j, 'min'] <- min(list[[i]][[j]])
+        out[out$event %in% i & out$time %in% j, 'max'] <- max(list[[i]][[j]])
+        out[out$event %in% i & out$time %in% j, 'median'] <- median(list[[i]][[j]])
+      }}}
+  
+  out$time <- recode(out$time, '1' = 22, '2' = 23, '3' = 24, '7' = 28, '9' = 30)
+  return(out)
+}
+imptimetos <- getimptimetos(imptimetos)
+imptimetos
+
+p$imp_events <- ggplot(data=imptimetos[!imptimetos$event %in% 'Censored',], aes(x=time, y=median, fill=event, ymin=min, ymax=max)) +
+  geom_bar(stat="identity", position = position_dodge(0.8), colour = 'black', width = 0.8) +
+  geom_errorbar(position = position_dodge(0.8), width = 0.5) +
+  labs(tag = 'B', x = '\nTimepoint', y = 'N\n', fill = '') +
+  theme_bw() +
+  theme(plot.title = element_text(face="bold", hjust=0.5), 
+        legend.position = 'bottom', 
+        legend.spacing.x = unit(5, 'cm'), 
+        text=element_text(size=20, family = 'Times New Roman'), 
+        axis.text.y = element_text(face="bold"), 
+        axis.text.x = element_text(face="bold")) +
+  scale_x_continuous(breaks=seq(22,30,1)) +
+  scale_y_continuous(limits=c(0,240), breaks=seq(0,240,40)) +
+  scale_fill_manual(values=c("grey50", "grey70", "grey90")) +
+  guides(fill = guide_legend(byrow = TRUE), colour = 'none')
+
+rm(getimpns, getimptimetos)
+
+#save plots
+ggsave(p$ncat, width = 12,   height = 8, filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/ns_percat_plt_pub.png')
+ggsave(p$events, width = 12,   height = 8, filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/ns_timetoevents_plt_pub.png')
+ggsave(p$censored, width = 12,   height = 8, filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/ns_timetocensored_plt_pub.png')
+
+ggsave(p$imp_ncat, width = 12,   height = 8, filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/ns_percat_imp_plt_pub.png')
+ggsave(p$imp_events, width = 12,   height = 8, filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/ns_timetoevents_imp_plt_pub.png')
+```
+
+# Sort figdata
+
+```{r sort-figdat}
+#what about timeInt??
+load('C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/logregfigdat.rda')
+
+logregfigdat <- lapply(logregfigdat, function(x){
+  x$modtype <- 'Logistic regression'
+  x <- x[x$adjusted %in% T,]
+  x$adjusted <- NULL
+  x$estimate <- x$OR
+  x$OR <- NULL
+  x <- x[,c('estimate','LCI','UCI','fill','var','var_label','y','label','outcome','modtype')]
+  return(x)
+})
+
+load('C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/survfigdat.rda')
+
+survfigdat <- lapply(survfigdat, function(x){
+  x$modtype <- 'Discrete-time survival (cause-specific)'
+  x$estimate <- x$HR
+  x$HR <- NULL
+  x <- x[,c('estimate','LCI','UCI','fill','var','var_label','y','label','outcome','modtype')]
+  return(x)
+})
+
+load('C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/subdistfigdat.rda')
+
+subdistfigdat <- lapply(subdistfigdat, function(x){
+  x$modtype <- 'Discrete-time survival (competing risks)'
+  x$estimate <- x$HR
+  x$HR <- NULL
+  x <- x[,c('estimate','LCI','UCI','fill','var','var_label','y','label','outcome','modtype')]
+  return(x)
+})
+
+figdat <- lapply(c('cc','cc_w','imp','imp_w'), function(x){
+  out <- rbind(logregfigdat[[x]], survfigdat[[x]], subdistfigdat[[x]])
+  out$modtype <- factor(out$modtype, 
+                        levels=c('Logistic regression',
+                                 'Discrete-time survival (cause-specific)',
+                                 'Discrete-time survival (competing risks)'))
+  col <- c("#999999","#ffff6d","#6db6ff","#b6dbff","#004949","#009292","#00954F","#006ddb","#782E53","#ff6db6","#4B1F77","#7F04FA","#920000","#924900","#db6d00")
+  names(col) <- levels(out$var_label)
+  out$col <- as.character(recode(out$var_label, !!!as.list(col)))
+  out$fill <- ifelse(out$fill %in% T, 'black', ifelse(out$fill %in% F, 'white', NA))
+  out$var_label <- factor(out$var_label, levels = c('Sex assigned at birth', 'Ethnicity', 'Average household income, GBP per week (11y)', 'Parental smoking (12y)', 'Smoking frequency (21y)','Is a parent (21y)','G1 Townsend deprivation score, quintiles (21y)','Mood and Feelings Questionnaire scores (21y)','Peer smoking (20y)', 'Drug use (20y)','Cannabis use (20y)','BMI (18y)', 'Binge drinking, six or more units (20y)', 'Educational qualifications (20y)', 'Frequency of exercise, past year (18y)'))
+  return(out)
+})
+names(figdat) <- c('cc','cc_w','imp','imp_w')
+
+#excluding parent_21 due to small sample size in cc
+figdat$cc[figdat$cc$var %in% 'parent_21', c('estimate','LCI','UCI')] <- NA
+figdat$cc_w[figdat$cc_w$var %in% 'parent_21', c('estimate','LCI','UCI')] <- NA
+```
+
+# Plots with all regression results
+
+```{r produce-surv-plots}
+pltit <- function(df){
+  df <- df[!df$var %in% c('sex','ethnicity','hhincome_11','parent_dailsmk_12'),]
+  pd <- position_dodge(0.8)
+  p <- ggplot(df, aes(x=estimate, xmin=LCI, xmax=UCI, y=y, shape=modtype, linetype=modtype, fill = fill), colour='black') +
+    geom_vline(xintercept = 1, color = "grey40", linetype = "dashed") +
+    geom_errorbar(width=.6, position = pd) +
+    geom_point(size=3, position = pd) +
+    facet_grid(var_label ~ outcome, scales = "free_y", switch = 'y') +
+    scale_x_log10() +
+    scale_y_discrete(labels=setNames(df$label, df$y), position = "right") +
+    scale_linetype_manual(values=c(1,2,3)) +
+    scale_shape_manual(values=c(21,22,24)) +
+    scale_fill_identity() +
+    theme_bw() +
+    theme(text=element_text(size=20, family = 'Times New Roman'), 
+          legend.position = 'bottom', 
+          legend.key.width = unit(2,"cm"),
+          strip.text.x = element_text(face = 'bold'), 
+          strip.background = element_blank(), 
+          strip.placement = "outside", 
+          strip.text.y.left = element_text(angle = 0, hjust = 1, face = 'bold')) +
+    labs(x = "\nEstimate", y = '', 
+         fill = 'CI overlap with 1 :', 
+         linetype = 'Model type :', shape = 'Model type :') + 
+    guides(linetype = guide_legend(nrow = 1), 
+           shape = guide_legend(nrow = 1, override.aes = list(size = 3, fill = 'black')))
+  return(p)
+}
+allplts <- lapply(figdat, pltit)
+```
+
+
+# Plots with Fine-Gray results
+
+```{r produce-surv-plots}
+load('C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/subdistfigdat.rda')
+
+subdistfigdat <- lapply(subdistfigdat, function(x){
+  x$modtype <- 'Discrete-time survival (competing risks)'
+  x$estimate <- x$HR
+  x$HR <- NULL
+  x <- x[,c('estimate','LCI','UCI','fill','var','var_label','y','label','outcome','modtype')]
+  return(x)
+})
+
+subdistfigdat$imp_w$var_label <- recode(subdistfigdat$imp_w$var_label, 
+  "Average household income, GBP per week (11y)" = "Household income, GBP per week (11y)", 
+  "Mood and Feelings Questionnaire scores (21y)" = "Mood and Feelings Questionnaire (21y)",
+  "G1 Townsend deprivation score, quintiles (21y)" = "Townsend deprivation, quintiles (21y)",
+  "Frequency of exercise, past year (18y)" = "Exercise frequency, past year (18y)"
+  )
+
+subdistfigdat$imp_w$label <- recode(subdistfigdat$imp_w$label, 
+  "Never, less than monthly, or not in past year" = "Never, < monthly, not past year"
+  )
+
+subdistfigdat$imp_w$var_label <- factor(subdistfigdat$imp_w$var_label, levels=c('Sex assigned at birth', 'Ethnicity', 'Household income, GBP per week (11y)', 'Parental smoking (12y)', 'BMI (18y)', 'Exercise frequency, past year (18y)', 'Educational qualifications (20y)', 'Binge drinking, six or more units (20y)','Cannabis use (20y)', 'Drug use (20y)','Peer smoking (20y)','Smoking frequency (21y)','Mood and Feelings Questionnaire (21y)','Townsend deprivation, quintiles (21y)','Is a parent (21y)'))
+
+subdistfigdat$imp_w$y <- interaction(subdistfigdat$imp_w$var_label, subdistfigdat$imp_w$label)
+subdistfigdat$imp_w$y <- factor(subdistfigdat$imp_w$y, levels=unique(subdistfigdat$imp_w$y))
+
+pltit <- function(df){
+  df <- df[!df$var %in% c('sex','ethnicity','hhincome_11','parent_dailsmk_12'),]
+  pd <- position_dodge(0.8)
+  p <- ggplot(df, aes(x=estimate, xmin=LCI, xmax=UCI, y=y), colour='black') +
+    geom_vline(xintercept = 1, color = "grey40", linetype = "dashed") +
+    geom_errorbar(width=.5, position = pd) +
+    geom_point(size=4, position = pd) +
+    facet_grid(var_label ~ outcome, scales = "free_y", switch = 'y') +
+    scale_x_log10() + 
+    scale_y_discrete(labels=setNames(df$label, df$y), position = "right") +
+    scale_linetype_manual(values=1) +
+    scale_shape_manual(values=21) +
+    scale_fill_identity() +
+    theme_bw() +
+    theme(text=element_text(size=22, family = 'Times New Roman'), 
+          strip.text.x = element_text(face = 'bold'), 
+          strip.background = element_blank(), 
+          strip.placement = "outside", 
+          strip.text.y.left = element_text(angle = 0, hjust = 1, face = 'bold')) +
+    labs(x = "\nHazard ratio (HR)", y = '') + 
+    guides(linetype = guide_legend(nrow = 1), 
+           shape = guide_legend(nrow = 1, override.aes = list(size = 3, fill = 'black')))
+  return(p)
+}
+finegrayplts <- lapply(subdistfigdat, pltit)
+
+ggsave(finegrayplts$imp_w, width = 16,   height = 16, filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/finegray_imp_w_plt.png')
+```
+
+# Outputs
+
+## Complete cases
+
+### Unweighted
+
+```{r print-cox-imp-plt, out.width="100%"}
+allplts$cc
+ggsave(allplts$cc, width = 18,   height = 10, filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/all_cc_plt.png')
+```
+
+### Weighted
+
+```{r print-cox-imp-plt, out.width="100%"}
+allplts$cc_w
+ggsave(allplts$cc_w, width = 18,   height = 10, filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/all_cc_w_plt.png')
+```
+
+## Imputed
+
+### Unweighted
+
+```{r print-cox-imp-plt, out.width="100%"}
+allplts$imp
+ggsave(allplts$imp, width = 18, height = 10, filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/all_imp_plt.png')
+```
+
+### Weighted
+
+```{r print-cox-imp-plt, out.width="100%"}
+allplts$imp_w
+ggsave(allplts$imp_w, width = 26, height = 15, dpi=1000, filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/all_imp_w_plt.png')
+```

@@ -1,0 +1,379 @@
+---
+title: "Logistic regression - transitions from smoking to e-cigarette use/non-use in ALSPAC"
+author: "Alexandria Andrayas"
+date: "26/02/2024"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+editor_options: 
+  chunk_output_type: console
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r load-packages}
+library(haven)
+library(labelled)
+library(mice)
+library(mitools)
+library(ggplot2)
+library(survey)
+library(gt)
+library(gtsummary)
+library(sticky)
+```
+
+# Load data, define labels, check sample size
+
+```{r data-labs-samp-size}
+subdf <- read_dta('//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/vaping_sub_measures.dta')
+subdf <- to_factor(subdf, sort_levels='auto')
+subdf <- data.frame(subdf)
+subdf <- sticky_all(subdf)
+subdf$id <- 1:nrow(subdf)
+
+# 858 participants reported smoking in past 30 days at 21yrs (55 lost to follow)
+nrow(subdf)
+table(is.na(subdf$firstevent))
+table(subdf$firstevent)
+
+# 4 baseline exposures
+baseline_exp <- c('sex', 'ethnicity', 'hhincome_11', 'parent_dailsmk_12')
+
+# 11 main exposures
+main_exp <- c('bmi_18_gr', 'exerc_18', 'qual_20', 'bingalc_20', 'cana_20', 'drug_20', 'friends_smk_20', 'mfq_21_gr', 'townsend_21_gr', 'parent_21', 'freqsmk_21')
+
+# 4 outcomes
+outcomes <- c('nonuse', 'ecig', 'exclecig', 'dual')
+outcomes_labs <- c('Non-use', 'Any e-cig use', 'Exsvydesive e-cig use', 'Dual use')
+
+# table labels
+tab_labs <- c('Sex assigned at birth', 'Ethnicity', 'Average household income, GBP per week (11y)', 'Parental smoking (12y)', 'BMI (18y)', 'Frequency of exercise, past year (18y)', 'Educational qualifications (20y)', 'Binge drinking, six or more units (20y)','Cannabis use (20y)', 'Drug use (20y)','Peer smoking (20y)','Mood and Feelings Questionnaire scores (21y)','G1 Townsend deprivation score, quintiles (21y)','Is a parent (21y)','Smoking frequency (21y)')
+
+#173 complete cases for exposures and outcomes
+subdf$completecase <- ifelse(apply(subdf[,c(baseline_exp,main_exp,outcomes)],1,anyNA)==F,1,0)
+table(subdf$completecase)
+subdf_cc <- subdf[subdf$completecase %in% 1,]
+
+#imputed data
+load('//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/vaping_imp.rda')
+load('//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/vaping_impdfs.rda')
+
+#survey design
+svydes <- svydesign(id = ~1, weights = ~weights, data = subdf)
+svydes_cc <- subset(svydes, completecase == 1)
+svydes_imp <- lapply(impdfs, function(x) svydesign(id = ~1, weights = ~weights, data = x))
+
+#show data
+head(subdf[,c('firstevent', outcomes, baseline_exp, main_exp)])
+head(impdfs[[1]][,c('firstevent', outcomes, baseline_exp, main_exp)])
+```
+
+# Outcomes
+
+In participants who answered yes to smoking in the past 30 days at 21 years and were not lost to follow up from 22 to 30 years (N = 803).
+
+```{r n-outcomes}
+outcomes_tab <- tbl_summary(subdf[!is.na(subdf$firstevent), outcomes], missing='no') %>% bold_labels()
+```
+
+# Descriptive statistics
+
+```{r desc-stats}
+desc_tabs <- list()
+
+desc_tabs$cc <- tbl_merge(tbls = list(
+  tbl_summary(subdf_cc[, c(baseline_exp, main_exp, 'nonuse')], by=nonuse, statistic=all_continuous() ~ "{mean} ({sd})") %>% add_p(),
+  tbl_summary(subdf_cc[, c(baseline_exp, main_exp, 'ecig')], by=ecig, statistic=all_continuous() ~ "{mean} ({sd})") %>% add_p(),
+  tbl_summary(subdf_cc[, c(baseline_exp, main_exp, 'dual')], by=dual, statistic=all_continuous() ~ "{mean} ({sd})") %>% add_p(),
+  tbl_summary(subdf_cc[, c(baseline_exp, main_exp, 'exclecig')], by=exclecig, statistic=all_continuous() ~ "{mean} ({sd})") %>% add_p(),
+  tbl_summary(subdf_cc[, c(baseline_exp, main_exp)], statistic=all_continuous() ~ "{mean} ({sd})")
+), tab_spanner = c('**Non-use**','**Any e-cig use**','**Dual use**','**Exsvydesive e-cig use**','**Overall**')) %>%
+  bold_labels() %>%
+  italicize_levels()
+
+desc_tabs$ccmiss <- tbl_merge(tbls = list(
+tbl_summary(subdf[, c(baseline_exp, main_exp, 'nonuse')], by=nonuse, statistic=all_continuous() ~ "{mean} ({sd})") %>% add_p(),
+tbl_summary(subdf[, c(baseline_exp, main_exp, 'ecig')], by=ecig, statistic=all_continuous() ~ "{mean} ({sd})") %>% add_p(),
+tbl_summary(subdf[, c(baseline_exp, main_exp, 'dual')], by=dual, statistic=all_continuous() ~ "{mean} ({sd})") %>% add_p(),
+tbl_summary(subdf[, c(baseline_exp, main_exp, 'exclecig')], by=exclecig, statistic=all_continuous() ~ "{mean} ({sd})") %>% add_p(),
+tbl_summary(subdf[!is.na(subdf$firstevent), c(baseline_exp, main_exp)], statistic=all_continuous() ~ "{mean} ({sd})")
+), tab_spanner = c('**Non-use**','**Any e-cig use**','**Dual use**','**Exsvydesive e-cig use**','**Overall**')) %>%
+  bold_labels() %>%
+  italicize_levels()
+
+#not sure about showing descriptive stats for imputed data??
+```
+
+# Specify models
+
+```{r specify-models}
+alist <- list(
+    cc = setNames(vector(mode='list', length=length(outcomes)),outcomes),
+    cc_w = setNames(vector(mode='list', length=length(outcomes)),outcomes),
+    imp = setNames(vector(mode='list', length=length(outcomes)),outcomes),
+    imp_w = setNames(vector(mode='list', length=length(outcomes)),outcomes)
+  )
+
+getmodeqs <- function(x, adj){
+  out <- list()
+  out$baseline <- paste0(x, ' ~ ', paste0(baseline_exp, collapse = ' + '))
+  for(i in main_exp){
+    if(adj %in% F){
+      out[[i]] <- paste0(x, ' ~ ', i)
+    } else if(adj %in% T){
+      out[[i]] <- paste0(x, ' ~ ', paste0(c(baseline_exp,i), collapse = ' + '))
+    }}
+  return(out)
+}
+modeqs <- list(unadjusted = setNames(lapply(outcomes, getmodeqs, F),outcomes),
+               adjusted = setNames(lapply(outcomes, getmodeqs, T),outcomes))
+rm(getmodeqs)
+```
+
+# Fit models
+
+```{r fit-models, warning = FALSE}
+##for weighted imputation we fit then convert back to mira object using mitools: https://nerler.github.io/EP16_Multiple_Imputation/practical/05_Working_with_Imputed_Data_in_Different_Formats.html
+fitmodels <- function(modeqs){
+  models <- alist
+  for(i in c('cc','cc_w','imp','imp_w')){
+    for(j in outcomes){
+      if(i %in% 'cc'){
+        models[[i]][[j]] <- lapply(modeqs[[j]], function(x) glm(formula=formula(x), family=binomial(link = "logit"), data=subdf_cc))
+        } else if(i %in% 'cc_w'){
+          models[[i]][[j]] <- lapply(modeqs[[j]], function(x) svyglm(formula=formula(x), family=binomial(link = "logit"), data=subdf_cc, design=svydes_cc))
+        } else if(i %in% 'imp'){
+          mods <- list()
+          for(k in 1:100){mods[[k]] <- lapply(modeqs[[j]], function(x) glm(formula=formula(x), family=binomial(link = "logit"), data = impdfs[[k]]))}
+          models[[i]][[j]] <- setNames(lapply(c('baseline',main_exp), function(x) lapply(mods, '[[', x)),c('baseline',main_exp))
+          models[[i]][[j]] <- lapply(models[[i]][[j]], as.mira)
+        } else if(i %in% 'imp_w'){          
+          mods <- list()
+          for(k in 1:100){mods[[k]] <- lapply(modeqs[[j]], function(x) svyglm(formula=formula(x), family=binomial(link = "logit"), data = impdfs[[k]], design=svydes_imp[[k]]))}
+          models[[i]][[j]] <- setNames(lapply(c('baseline',main_exp), function(x) lapply(mods, '[[', x)),c('baseline',main_exp))
+          models[[i]][[j]] <- lapply(models[[i]][[j]], as.mira)
+      }}}
+  return(models)
+}
+models <- list(unadjusted = fitmodels(modeqs$unadjusted), adjusted = fitmodels(modeqs$adjusted))
+
+rm(modeqs, fitmodels, svydes, svydes_cc, svydes_imp, subdf, subdf_cc, impdfs)
+```
+
+# Produce tables
+
+```{r produce-tables, warning = FALSE}
+tblit <- function(models){
+  tables <- alist
+  for(i in c('cc','cc_w','imp','imp_w')){
+    for(j in outcomes){
+      tables[[i]][[j]]$baseline <- tbl_regression(models[[i]][[j]]$baseline, exponentiate = T) %>% bold_labels() %>% italicize_levels()
+      for(k in main_exp){
+        tables[[i]][[j]][[k]] <- tbl_regression(models[[i]][[j]][[k]], exponentiate = T, include = k) %>% bold_labels() %>% italicize_levels()
+      }}}
+  return(tables)
+}
+tables <- list(unadjusted = tblit(models$unadjusted), adjusted = tblit(models$adjusted))
+
+rm(tblit)
+```
+
+# Group tables
+
+```{r group-tables}
+tblcomb <- function(tables){
+  outtabs <- list(
+    cc = setNames(vector(mode='list', length=length(c('baseline',main_exp))),c('baseline',main_exp)),
+    cc_w = setNames(vector(mode='list', length=length(c('baseline',main_exp))),c('baseline',main_exp)),
+    imp = setNames(vector(mode='list', length=length(c('baseline',main_exp))),c('baseline',main_exp)),
+    imp_w = setNames(vector(mode='list', length=length(c('baseline',main_exp))),c('baseline',main_exp))
+  )
+  for(i in c('cc','cc_w','imp','imp_w')){
+    for(j in c('baseline',main_exp)){
+      outtabs[[i]][[j]] <- tbl_merge(list(tables[[i]]$nonuse[[j]],
+                                          tables[[i]]$ecig[[j]],
+                                          tables[[i]]$exclecig[[j]],
+                                          tables[[i]]$dual[[j]]),
+                                     tab_spanner = paste0('**',outcomes_labs,'**'))
+    }
+    outtabs[[i]] <- tbl_stack(outtabs[[i]])
+  }
+  return(outtabs)
+}
+outtabs <- list(unadjusted = tblcomb(tables$unadjusted), adjusted = tblcomb(tables$adjusted))
+
+rm(tblcomb)
+```
+
+# Sort data for figures
+
+```{r sort-figdat}
+getfigdat <- function(tab){
+  out <- data.frame(
+  'var' = tab$table_body$variable,
+  'var_label' = tab$table_body$var_label,
+  'label' = tab$table_body$label,
+  'OR' = tab$table_body$estimate,
+  'LCI' = tab$table_body$conf.low,
+  'UCI' = tab$table_body$conf.high,
+  'ref' = tab$table_body$reference_row,
+  'header' = tab$table_body$header_row)
+  out[,c('OR','LCI','UCI')] <- sapply(out[,c('OR','LCI','UCI')], round, digits = 3)
+  out <- out[out$header %in% F,]
+  out$fill <- ifelse(out$LCI < 1 & out$UCI > 1, F, T)
+  return(out)
+}
+
+multgetfigdat <- function(dat){
+  out <- do.call('rbind',dat)
+  out$var <- factor(out$var, levels=c(baseline_exp, main_exp))
+  out$var_label <- factor(out$var_label, levels=tab_labs)
+  out$y <- interaction(out$var_label, out$label)
+  out$y <- factor(out$y, levels=unique(out$y))
+  rownames(out) <- NULL
+  return(out)
+}
+
+combineit <- function(tables){
+  figdat <- alist
+  for(i in c('cc','cc_w','imp','imp_w')){
+    for(j in outcomes){
+      figdat[[i]][[j]] <- multgetfigdat(lapply(tables[[i]][[j]], getfigdat))
+    }}
+  return(figdat)
+}
+figdat <- list(unadjusted = combineit(tables$unadjusted), adjusted = combineit(tables$adjusted))
+
+longfigdat <- function(df){
+  out <- do.call('rbind', df)
+  out$outcome <- factor(rep(outcomes,sapply(df[outcomes], nrow)), levels=outcomes, labels=outcomes_labs)
+  return(out)
+  }
+logregfigdat <- list(unadjusted = lapply(figdat$unadjusted, longfigdat), adjusted = lapply(figdat$adjusted, longfigdat))
+
+logregfigdat <- lapply(c('cc','cc_w','imp','imp_w'), function(x) rbind(cbind(logregfigdat$unadjusted[[x]], 'adjusted'=F),cbind(logregfigdat$adjusted[[x]], 'adjusted'=T)))
+names(logregfigdat) <- c('cc','cc_w','imp','imp_w')
+
+save(logregfigdat, file='C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/logregfigdat.rda')
+
+rm(getfigdat, multgetfigdat, combineit, longfigdat, alist, baseline_exp, main_exp, tab_labs, outcomes, outcomes_labs)
+```
+
+# N outcomes
+```{r print-outcomes-ns}
+outcomes_tab
+outcomes_tab |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/outcomes_tab.docx')
+```
+
+# Descriptive statistics
+
+## Complete cases
+
+```{r print-desc-cc-stats}
+desc_tabs$cc
+desc_tabs$cc |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/desc_cc_tab.docx')
+```
+
+## Full sample
+
+```{r print-desc-fullsamp-stats}
+desc_tabs$ccmiss
+desc_tabs$ccmiss |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/desc_ccmiss_tab.docx')
+```
+
+# Tables
+
+## Complete cases
+
+### Unweighted
+
+#### Unadjusted
+
+```{r print-cc-unadj-tab}
+outtabs$unadjusted$cc
+outtabs$unadjusted$cc |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/logreg_cc_unadj_tab.docx')
+```
+
+#### Adjusted
+
+```{r print-cc-adj-tab}
+outtabs$adjusted$cc
+outtabs$adjusted$cc |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/logreg_cc_adj_tab.docx')
+```
+
+### Weighted
+
+#### Unadjusted
+
+```{r print-cc_w-unadj-tab}
+outtabs$unadjusted$cc_w
+outtabs$unadjusted$cc_w |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/logreg_cc_unadj_w_tab.docx')
+```
+
+#### Adjusted
+
+```{r print-cc_w-adj-tab}
+outtabs$adjusted$cc_w
+outtabs$adjusted$cc_w |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/logreg_cc_adj_w_tab.docx')
+```
+
+## Imputed
+
+### Unweighted
+
+#### Unadjusted
+
+```{r print-imp-unadj-tab}
+outtabs$unadjusted$imp
+outtabs$unadjusted$imp |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/logreg_imp_unadj_tab.docx')
+```
+
+#### Adjusted
+
+```{r print-imp-adj-tab}
+outtabs$adjusted$imp
+outtabs$adjusted$imp |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/logreg_imp_adj_tab.docx')
+```
+
+### Weighted
+
+#### Unadjusted
+
+```{r print-imp_w-unadj-tab}
+outtabs$unadjusted$imp_w
+outtabs$unadjusted$imp_w |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/logreg_imp_unadj_w_tab.docx')
+```
+
+#### Adjusted
+
+```{r print-imp_w-adj-tab}
+outtabs$adjusted$imp_w
+outtabs$adjusted$imp_w |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/Users/qg21962/OneDrive - University of Bristol/Documents/CRUK smoking vaping/Vaping transitions/Outputs/logreg_imp_adj_w_tab.docx')
+```

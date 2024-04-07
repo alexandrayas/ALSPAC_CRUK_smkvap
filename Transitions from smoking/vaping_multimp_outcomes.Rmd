@@ -1,0 +1,245 @@
+---
+title: "Multiple imputation (outcomes) - transitions from smoking to e-cigarette use/non-use in ALSPAC"
+author: "Alexandria Andrayas"
+date: "21/02/2024"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Load packages
+
+```{r load-packages}
+library(haven)
+library(labelled)
+library(sticky)
+library(gtsummary)
+library(mice)
+library(ggmice)
+library(ggplot2)
+```
+
+# Load data and define exposures
+
+```{r data-labs, message=FALSE}
+subdf <- read_dta('//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/vaping_sub_measures.dta')
+subdf <- to_factor(subdf, sort_levels='auto')
+subdf <- data.frame(subdf)
+subdf <- sticky_all(subdf)
+
+# 858 participants
+nrow(subdf)
+
+# 5 outcome timepoints
+vaps <- c('vap22','vap23','vap24','vap28','vap30')
+subdf$nvaps <- rowSums(!is.na(subdf[,vaps]))
+table(subdf$nvaps)
+
+# 55 lost to follow up
+table(subdf$losfoll)
+
+# 4 baseline exposures
+baseline_exp <- c('sex', 'ethnicity', 'hhincome_11', 'parent_dailsmk_12')
+  
+# 11 main exposures
+outcome_exp_labs <- c('bmi_18_gr', 'exerc_18', 'qual_20', 'bingalc_20', 'cana_20', 'drug_20',
+                      'friends_smk_20', 'mfq_21_gr', 'townsend_21_gr', 'parent_21', 'freqsmk_21')
+
+# 24 auxiliary variables
+outcome_aux_labs <- c('hhincome_8', 'hhincome_18', 
+                      'parent_dailsmk_2', 'parent_currsmk_18', 
+                      'bmi_16_gr', 'bmi_24_gr',
+                      'exerc_16', 'exerc_22',
+                      'eduasp_16', 'qual_18', 
+                      'alc_16', 'bingalc_18',
+                      'cana_16', 'cana_18',
+                      'drug_16', 'drug_18',
+                      'friends_smk_16', 'friends_smk_18', 
+                      'mfq_14_gr', 'mfq_18_gr', 
+                      'townsend_18_gr', 'townsend_20_gr',
+                      'parent_20','parent_22')
+
+df <- data.frame(subdf[,c(vaps,baseline_exp,outcome_exp_labs,outcome_aux_labs)])
+df_w <- cbind(df, 'weights' = subdf$weights)
+head(df_w)
+```
+
+# Patterns of missingness
+
+```{r missing-patterns, out.width = '100%'}
+plot_pattern(df[,c(baseline_exp,outcome_exp_labs)], rotate=T) + 
+  coord_flip() +
+  theme(axis.text.x = element_text(size=3), axis.text.y = element_text(size=8)) +
+  labs(x = 'Number of missing entries per column*')
+```
+
+# Predictors of complete cases
+
+There are 173 complete cases for the baseline and main exposures only.
+
+```{r complete-cases}
+dfCC <- df[,c(baseline_exp,outcome_exp_labs)]
+dfCC$completecase <- ifelse(apply(dfCC,1,anyNA)==F,1,0)
+table(dfCC$completecase)
+
+tbl_uvregression(dfCC, method = glm, y = completecase, method.args = list(family = binomial), exponentiate = TRUE)
+```
+
+# Correlations between variables
+
+```{r corr-matrix, out.width = '100%'}
+plot_corr(df, rotate = T) +
+  theme(axis.text.x = element_text(size=7, hjust=0), axis.text.y = element_text(size=7))
+```
+
+# Predictor matrix
+
+```{r pred-matrix, out.width = '100%'}
+derivlabs <- c('timeto','firstevent','dual','exclecig','nonuse')
+df_w[,derivlabs] <- NA
+
+getmethod <- function(df){
+  out <- rep('', ncol(df))
+  names(out) <- colnames(df)
+  for(i in colnames(df)){
+    if(is.numeric(df[,i]) == T){
+      out[i] <- ifelse(shapiro.test(df[,i])$p.value < 0.01, 'pmm', 'norm')
+    } else if(is.factor(df[,i]) == T & is.ordered(df[,i]) == F){
+      out[i] <- ifelse(length(levels(df[,i])) > 2, 'polyreg', 'logreg')
+    } else if(is.factor(df[,i]) == T & is.ordered(df[,i]) == T){
+      out[i] <- ifelse(length(levels(df[,i])) > 2, 'polr', NA)
+    }
+  }
+  return(out)
+}
+method <- getmethod(df_w)
+
+method[c('sex','weights')] <- ''
+
+method['timeto'] <- "~ ifelse(vap22 %in% c('Non-use', 'Exclusive e-cigarette use','Dual use'), 1, ifelse(vap23 %in% c('Non-use', 'Exclusive e-cigarette use','Dual use'), 2, ifelse(vap24 %in% c('Non-use', 'Exclusive e-cigarette use','Dual use'), 3, ifelse(vap28 %in% c('Non-use', 'Exclusive e-cigarette use','Dual use'), 7, ifelse(vap30 %in% c('Non-use', 'Exclusive e-cigarette use','Dual use'), 9, ifelse(vap30 %in% c('Exclusive smoking'), 9, ifelse(vap28 %in% c('Exclusive smoking'), 7, ifelse(vap24 %in% c('Exclusive smoking'), 3, ifelse(vap23 %in% c('Exclusive smoking'), 2, ifelse(vap22 %in% c('Exclusive smoking'), 1, NA))))))))))"
+
+method['firstevent'] <- "~ ifelse(timeto %in% 1, vap22, ifelse(timeto %in% 2, vap23, ifelse(timeto %in% 3, vap24, ifelse(timeto %in% 7, vap28, ifelse(timeto %in% 9, vap30, NA)))))"
+
+method['dual'] <- "~ ifelse(firstevent %in% 2, 1, 0)"
+method['exclecig'] <- "~ ifelse(firstevent %in% 3, 1, 0)"
+method['nonuse'] <- "~ ifelse(firstevent %in% 4, 1, 0)"
+
+predm <- quickpred(df_w)
+predm[c(derivlabs,vaps,baseline_exp,outcome_exp_labs)[!c(derivlabs,vaps,baseline_exp,outcome_exp_labs) %in% 'sex'], c(derivlabs,vaps,baseline_exp,outcome_exp_labs)] <- 1
+predm[,'weights'] <- 1
+predm[c('sex','weights',derivlabs),] <- 0
+predm[vaps,c(derivlabs)] <- 0
+predm[,'firstevent'] <- 0
+diag(predm) <- 0
+
+plot_pred(predm, rotate = T, label = F) +
+  theme(axis.text.x = element_text(size=7, hjust=0), axis.text.y = element_text(size=7))
+```
+
+# Imputation
+
+```{r imputation, results = 'hide'}
+imp <- mice(data = df_w, m = 100, maxit = 25, donors = 10, method = method, predictorMatrix = predm, seed = 237657)
+```
+
+
+# Get imputed datasets
+
+```{r imp-datasets}
+#run complete on imputed datasets and check first events are correct
+impdfs <- lapply(1:imp$m, function(x) complete(imp, x))
+
+#convert first events in imputed datasets to factors and add variable labels
+derivoutc <- function(df){
+  
+  df$firstevent <- factor(df$firstevent, levels=c(1:4), labels=c('Censored','Dual use','Exclusive e-cigarette use','Non-use'))
+  
+  df$ecig <- ifelse(df$firstevent %in% c('Exclusive e-cigarette use','Dual use'), 1, 0)
+  
+  var_label(df[,c('nonuse','ecig','exclecig','dual')]) <- c(nonuse = 'Non-use (22-30y)', ecig = 'Any e-cig use (22-30y)', exclecig = 'Exclusive e-cig use (22-30y)', dual = 'Dual use (22-30y)')
+  
+  return(df)
+}
+impdfs <- lapply(impdfs, derivoutc)
+
+#check Ns in imputed dataset 1
+sapply(impdfs[[1]][,c('nonuse', 'ecig', 'dual', 'exclecig')],table)
+table(impdfs[[1]]$firstevent, impdfs[[1]]$timeto)
+#lapply(impdfs, function(x) sapply(x[,c('nonuse', 'ecig', 'dual', 'exclecig')],table))
+
+#check first events match status variables in imputed dataset 1
+head(impdfs[[1]][,c('firstevent','timeto',vaps)],20)
+
+#save
+save(imp, file='//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/vaping_imp.rda')
+save(impdfs, file='//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/vaping_impdfs.rda')
+```
+
+# Derive outcomes in subdf
+
+```{r derive-outcomes-subdf}
+#function to derive outcomes
+#note: this ignores events in missing intermediate timepoints
+derivoutc2 <- function(df){
+  
+  df$losfoll <- ifelse(is.na(df$vap22) & is.na(df$vap23) & is.na(df$vap24) & is.na(df$vap28) & is.na(df$vap30), 1, 0)
+  
+  df$timeto <- ifelse(df$losfoll %in% 1, NA, 
+                      ifelse(df$vap22 %in% c('Non-use', 'Exclusive e-cigarette use','Dual use'), 1, 
+                      ifelse(df$vap23 %in% c('Non-use', 'Exclusive e-cigarette use','Dual use'), 2, 
+                      ifelse(df$vap24 %in% c('Non-use', 'Exclusive e-cigarette use','Dual use'), 3, 
+                      ifelse(df$vap28 %in% c('Non-use', 'Exclusive e-cigarette use','Dual use'), 7, 
+                      ifelse(df$vap30 %in% c('Non-use', 'Exclusive e-cigarette use','Dual use'), 9, 
+                      ifelse(df$vap30 %in% 'Exclusive smoking', 9, 
+                      ifelse(df$vap28 %in% 'Exclusive smoking', 7, 
+                      ifelse(df$vap24 %in% 'Exclusive smoking', 3, 
+                      ifelse(df$vap23 %in% 'Exclusive smoking', 2, 
+                      ifelse(df$vap22 %in% 'Exclusive smoking', 1, NA)))))))))))
+  
+  df$firstevent <- ifelse(df$losfoll %in% 1, NA, 
+                   ifelse(df$timeto %in% 1, df$vap22, 
+                   ifelse(df$timeto %in% 2, df$vap23, 
+                   ifelse(df$timeto %in% 3, df$vap24, 
+                   ifelse(df$timeto %in% 7, df$vap28, 
+                   ifelse(df$timeto %in% 9, df$vap30, NA))))))
+  
+  df$firstevent <- factor(df$firstevent, levels=c(1:4), labels=c('Censored','Dual use','Exclusive e-cigarette use','Non-use'))
+  
+  df$nonuse <- ifelse(is.na(df$firstevent), NA, ifelse(df$firstevent %in% 'Non-use', 1, 0))
+  df$ecig <- ifelse(is.na(df$firstevent), NA, ifelse(df$firstevent %in% c('Exclusive e-cigarette use','Dual use'), 1, 0))
+  df$exclecig <- ifelse(is.na(df$firstevent), NA, ifelse(df$firstevent %in% 'Exclusive e-cigarette use', 1, 0))
+  df$dual <- ifelse(is.na(df$firstevent), NA, ifelse(df$firstevent %in% 'Dual use', 1, 0))
+
+  var_label(df[,c('nonuse','ecig','exclecig','dual')]) <- c(nonuse = 'Non-use (22-30y)', ecig = 'Any e-cig use (22-30y)', exclecig = 'Exclusive e-cig use (22-30y)', dual = 'Dual use (22-30y)')
+  return(df)
+}
+
+#exclusive smoking = censored at last observation of "non-event"
+#events censored at first competing risk
+subdf <- derivoutc2(subdf)
+
+#check Ns
+sapply(subdf[,c('nonuse', 'ecig', 'dual', 'exclecig')],table)
+table(subdf$firstevent, subdf$timeto)
+
+#check first events match status variables
+head(subdf[,c('firstevent','timeto',vaps)],20)
+
+#save
+write_dta(subdf, '//rdsfcifs.acrc.bris.ac.uk/MRC-IEU-research/projects/ieu2/p7/025/working/data/vaping_sub_measures.dta')
+```
+
+# Descriptive statisitcs
+
+```{r desc-stats}
+sapply(subdf[,c(baseline_exp, outcome_exp_labs, outcome_aux_labs)], table)
+sapply(sapply(subdf[,c(baseline_exp, outcome_exp_labs, outcome_aux_labs)], table), sum)
+unlist(sapply(subdf[,c(baseline_exp, outcome_exp_labs, outcome_aux_labs)], table))[unlist(sapply(subdf[,c(baseline_exp, outcome_exp_labs, outcome_aux_labs)], table)) <50]
+#ethnicity, eduasp_16, drug_16, parent_20
+```
