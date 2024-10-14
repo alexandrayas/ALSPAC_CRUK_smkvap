@@ -1,0 +1,232 @@
+---
+title: "Multiple imputation (selection + weights) - transitions from smoking to e-cigarette use/non-use in ALSPAC"
+author: "Alexandria Andrayas"
+date: "21/02/2024"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Load packages
+
+```{r load-packages}
+library(haven)
+library(labelled)
+library(sticky)
+library(gtsummary)
+library(mice)
+library(ggmice)
+library(ggplot2)
+```
+
+# Load data and set labels
+
+```{r data-labs, message=FALSE}
+#data
+vapdf <- read_dta('//path/to/ieu/project/folder/working/data/vaping_transitions/vaping_categories.dta')
+expdf <- read_dta('//path/to/ieu/project/folder/working/data/vaping_transitions/vaping_exp_measures.dta')
+
+alldf <- merge(vapdf, expdf, by=c('aln','qlet'))
+alldf <- to_factor(alldf, sort_levels='auto')
+alldf$id <- paste0(alldf$aln, alldf$qlet)
+rm(vapdf, expdf)
+
+#labels
+varlabs <- list(smk_21 = 'Smoking (21y)', 
+                freqsmk_21 = 'Smoking frequency (21y)', 
+                parent_dailsmk_2 = 'Parental smoking (2y)', 
+                parent_dailsmk_12 = 'Parental smoking (12y)', 
+                parent_currsmk_18 = 'Parental smoking (18y)',
+                parent_mh_1 = 'Parental mental health condition, since birth (1y)', 
+                parent_mh_12 = 'Parental mental health condition, last 2 years (12y)', 
+                parent_mhmeds_18 = 'Parental mental health medication, last 2 years (18y)', 
+                hhincome_8 = 'Average household income, GBP per week (8y)', 
+                hhincome_11 = 'Average household income, GBP per week (11y)', 
+                hhincome_18 = 'Average household income, GBP per month (18y)', 
+                sex = 'Sex assigned at birth', 
+                ethnicity = 'Ethnicity', 
+                eduasp_14 = 'Plans after Year 11 (14y)', 
+                eduasp_16 = 'Plans after Year 11 (16y)', 
+                qual_18 = 'Educational qualifications (18y)', 
+                qual_20 = 'Educational qualifications (20y)', 
+                bmi_16_gr = 'BMI (16y)', 
+                bmi_18_gr = 'BMI (18y)', 
+                bmi_24_gr = 'BMI (24y)', 
+                exerc_16 = 'Frequency of exercise, past year (16y)', 
+                exerc_18 = 'Frequency of exercise, past year (18y)', 
+                exerc_22 = 'Frequency of exercise, past year (22y)', 
+                everalc_14 = 'Ever drank alcohol (14y)', 
+                alc_16 = 'Alcohol consumption (16y)', 
+                alc_18 = 'Alcohol consumption (18y)', 
+                bingalc_18 = 'Binge drinking, six or more units (18y)', 
+                bingalc_20 = 'Binge drinking, six or more units (20y)', 
+                evercana_14 = 'Ever used cannabis (14y)', 
+                cana_16 = 'Cannabis use (16y)', 
+                cana_18 = 'Cannabis use (18y)', 
+                cana_20 = 'Cannabis use (20y)', 
+                everdrug_14 = 'Ever used drugs (14y)', 
+                drug_16 = 'Drug use (16y)', 
+                drug_18 = 'Drug use (18y)', 
+                drug_20 = 'Drug use (20y)',
+                friends_smk_14 = 'Peer smoking (14y)', 
+                friends_smk_16 = 'Peer smoking (16y)', 
+                friends_smk_18 = 'Peer smoking (18y)', 
+                friends_smk_20 = 'Peer smoking (20y)', 
+                mfq_14_gr = 'Mood and Feelings Questionnaire scores (14y)', 
+                mfq_18_gr = 'Mood and Feelings Questionnaire scores (18y)', 
+                mfq_21_gr = 'Mood and Feelings Questionnaire scores (21y)', 
+                townsend_18_gr = 'G1 Townsend deprivation score, quintiles (18y)', 
+                townsend_20_gr = 'G1 Townsend deprivation score, quintiles (20y)', 
+                townsend_21_gr = 'G1 Townsend deprivation score, quintiles (21y)', 
+                parent_20 = 'Is a parent (20y)', 
+                parent_21 = 'Is a parent (21y)', 
+                parent_22 = 'Is a parent (22y)'
+)
+var_label(alldf) <- varlabs
+rm(varlabs)
+alldf <- sticky_all(alldf)
+
+# 3290 participants answered questions on smoking at 21 yrs (YPA) and not withdrawn consent
+alldf <- alldf[!is.na(alldf$smk_21),]
+nrow(alldf)
+```
+
+# Define exposures for selection model
+
+```{r exposures-aux, message=FALSE}
+#13 main exposures
+selection_exp_labs <- c('sex', 'ethnicity', 'hhincome_11', 'parent_dailsmk_12', 'parent_mh_12',
+                        'friends_smk_16', 'eduasp_16', 'alc_16', 'cana_16', 'drug_16', 'exerc_18',
+                        'bmi_18_gr', 'mfq_18_gr')
+
+#22 auxiliary variables (maybe add in measures collected after 21 years too?)
+selection_aux_labs <- c('hhincome_8', 'hhincome_18', 
+                        'parent_dailsmk_2', 'parent_currsmk_18',
+                        'parent_mh_1', 'parent_mhmeds_18', 
+                        'friends_smk_14', 'friends_smk_18',
+                        'eduasp_14', 'qual_18', 
+                        'everalc_14', 'alc_18',
+                        'evercana_14', 'cana_18',
+                        'everdrug_14', 'drug_18',
+                        'exerc_16', 'exerc_22',
+                        'bmi_16_gr', 'bmi_24_gr',
+                        'mfq_14_gr', 'mfq_21_gr')
+
+df <- data.frame(alldf[,c('smk_21',selection_exp_labs,selection_aux_labs)])
+head(df)
+```
+
+# Patterns of missingness
+
+```{r missing-patterns, out.width = '100%'}
+plot_pattern(df[,selection_exp_labs], rotate=T) + 
+  coord_flip() +
+  theme(axis.text.x = element_text(size=3), axis.text.y = element_text(size=8)) +
+  labs(x = 'Number of missing entries per column*')
+```
+
+# Predictors of complete cases
+
+There are 872 complete cases.
+
+```{r complete-cases}
+dfCC <- df[,selection_exp_labs]
+dfCC$completecase <- ifelse(apply(dfCC,1,anyNA)==F,1,0)
+table(dfCC$completecase)
+
+tbl_uvregression(dfCC, method = glm, y = completecase, method.args = list(family = binomial), exponentiate = TRUE)
+```
+
+# Correlations between variables
+
+```{r corr-matrix, out.width = '100%'}
+plot_corr(df, rotate = T) +
+  theme(axis.text.x = element_text(size=7, hjust=0), axis.text.y = element_text(size=7))
+```
+
+# Predictor matrix
+
+By default, mice() uses 'pmm' (predictive mean matching) for numeric data, 'logreg' (logistic regression imputation) for binary data/factors with 2 levels, 'polyreg' (polytomous regression imputation) for unordered categorical data/factors with > 2 levels, and 'polr' (proportional odds model) for ordered factors with > 2 levels. I added a Shapiro-Wilk Normality Test to use 'norm' imputation method for normally distributed numeric variables instead of 'pmm'.
+
+We may want to use 'norm' method to impute all numeric variables.
+
+```{r pred-matrix, message=FALSE}
+getmethod <- function(df){
+  out <- rep('', ncol(df))
+  names(out) <- colnames(df)
+  for(i in colnames(df)){
+    if(is.numeric(df[,i]) == T){
+      out[i] <- ifelse(shapiro.test(df[,i])$p.value < 0.01, 'pmm', 'norm')
+    } else if(is.factor(df[,i]) == T & is.ordered(df[,i]) == F){
+      out[i] <- ifelse(length(levels(df[,i])) > 2, 'polyreg', 'logreg')
+    } else if(is.factor(df[,i]) == T & is.ordered(df[,i]) == T){
+      out[i] <- ifelse(length(levels(df[,i])) > 2, 'polr', NA)
+    }
+  }
+  return(out)
+}
+fcs_method <- getmethod(df)
+fcs_method[c('smk_21','sex')] <- ''
+
+predm <- quickpred(df)
+
+predm[c('smk_21','sex'),] <- 0
+predm[selection_exp_labs[!selection_exp_labs %in% 'sex'], c('smk_21',selection_exp_labs)] <- 1
+diag(predm) <- 0
+
+plot_pred(predm, rotate = T, label = F, method = fcs_method) +
+  theme(axis.text.x = element_text(size=7, hjust=0), axis.text.y = element_text(size=7))
+```
+
+# Imputation
+
+```{r imputation, results='hide'}
+imp_selection <- mice(data = df, m = 100, maxit = 25, donors = 10, method = fcs_method, predictorMatrix = predm, seed = 237657)
+```
+
+# Weights 
+
+Using suggestions from mice author Stef van Buuren here: https://github.com/amices/mice/issues/82
+
+```{r weights, message=FALSE}
+fit_smk_21 <- with(imp_selection, glm(formula = formula(paste0('smk_21 ~ ', paste0(selection_exp_labs, collapse = ' + '))), family = binomial(link = "logit")))
+
+predimp <- function(fit){
+  #obtain predictions (Q) and prediction variance (U)
+all_preds <- lapply(getfit(fit), predict, se.fit = TRUE, type = 'response')
+Q <- sapply(all_preds, `[[`, "fit")
+U <- sapply(all_preds, `[[`, "se.fit")^2
+dfcom <- getfit(fit)[[1]]$df.null #assuming null df is the correct one?
+  #pool predictions
+pi <- lapply(1:nrow(Q), function(x) pool.scalar(Q[x, ], U[x, ], n = dfcom + 1))
+pi <- lapply(pi, unlist)
+pi <- do.call('rbind',pi)
+out <- data.frame('fit' = pi[,'qbar'], 'se.fit' = sqrt(pi[,'t']), 'df' = pi[,'df'])
+return(out)
+}
+predprobs <- predimp(fit_smk_21)
+
+  #calculate weights
+alldf$predicted_probs <- predprobs$fit
+alldf$weights <- 1/(alldf$predicted_probs)
+
+  #save data
+write_dta(alldf, '//path/to/ieu/project/folder/working/data/vaping_transitions/vaping_all_measures.dta')
+subdf <- alldf[alldf$smk_21 %in% 1,]
+write_dta(subdf, '//path/to/ieu/project/folder/working/data/vaping_transitions/vaping_sub_measures.dta')
+```
+
+# Descriptive statisitcs
+
+```{r desc-stats}
+sapply(alldf[,c(selection_exp_labs, selection_aux_labs)], table)
+sapply(sapply(alldf[,c(selection_exp_labs, selection_aux_labs)], table), sum)
+unlist(sapply(alldf[,c(selection_exp_labs, selection_aux_labs)], table))[unlist(sapply(alldf[,c(selection_exp_labs, selection_aux_labs)], table)) <500]
+#eduasp_16, drug_16, cana_18
+```

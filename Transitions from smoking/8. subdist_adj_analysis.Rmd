@@ -1,0 +1,381 @@
+---
+title: "Subdistribution discrete-time survival analysis, adjusted for early-life confounders - transitions from smoking to e-cigarette use/non-use in ALSPAC"
+author: "Alexandria Andrayas"
+date: "05/02/2024"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = FALSE)
+```
+
+```{r load-packages}
+library(haven)
+library(labelled)
+library(sticky)
+library(survey)
+library(dplyr)
+library(ggpubr)
+library(mice)
+library(mitools)
+library(gt)
+library(gtsummary)
+library(discSurv)
+```
+
+# Load data and define labels
+
+```{r data-labs}
+# set up data
+subdf <- read_dta('//path/to/ieu/project/folder/working/data/vaping_transitions/vaping_sub_measures.dta')
+subdf <- to_factor(subdf, sort_levels='auto')
+subdf <- data.frame(subdf)
+subdf <- sticky_all(subdf)
+
+subdf$id <- 1:nrow(subdf)
+
+load('//path/to/ieu/project/folder/working/data/vaping_transitions/vaping_impdfs.rda')
+impdfs <- lapply(impdfs, function(x){
+  x[,'id'] <- 1:nrow(x)
+  return(x)
+})
+
+# 4 baseline exposures
+confounders <- c('sex', 'ethnicity', 'hhincome_11', 'parent_dailsmk_12')
+
+# 11 main exposures
+main_exp <- c('bmi_18_gr', 'exerc_18', 'qual_20', 'bingalc_20', 'cana_20', 'drug_20', 'friends_smk_20', 'mfq_21_gr', 'townsend_21_gr', 'parent_21', 'freqsmk_21')
+
+# 5 timepoints
+vaps <- c('vap22', 'vap23', 'vap24', 'vap28', 'vap30')
+
+# outcomes
+outcomes <- c('nonuse', 'exclecig', 'dual')
+outcomes_labs <- c('Non-use', 'Exclusive e-cig use', 'Dual use')
+outcomes_ecig_collapsed <- c('nonuse', 'ecig')
+outcomes_labs_ecig_collapsed <- c('Non-use', 'E-cigarette use')
+
+# table labels
+tab_labs <- c('Sex assigned at birth', 'Ethnicity', 'Average household income, GBP per week (11y)', 'Parental smoking (12y)', 'BMI (18y)', 'Frequency of exercise, past year (18y)', 'Educational qualifications (20y)', 'Binge drinking, six or more units (20y)','Cannabis use (20y)', 'Drug use (20y)','Peer smoking (20y)','Mood and Feelings Questionnaire scores (21y)','G1 Townsend deprivation score, quintiles (21y)','Is a parent (21y)','Smoking frequency (21y)')
+
+# change discrete time-to-event data to (1 = 22y, 2 = 23y, 3 = 24y, 4 = 28y, 5 = 30y)
+changetimeto <- function(df){
+  df$timeto[df$timeto %in% 7] <- 4
+  df$timeto[df$timeto %in% 9] <- 5
+  return(df)
+}
+subdf <- changetimeto(subdf)
+impdfs <- lapply(impdfs, changetimeto)
+rm(changetimeto)
+
+#168 complete cases for exposures and outcomes
+subdf$completecase <- ifelse(apply(subdf[,c('firstevent','timeto',confounders,main_exp)],1,anyNA)==F,1,0)
+table(subdf$completecase)
+subdf_cc <- subdf[subdf$completecase %in% 1,]
+
+# head data
+head(subdf[,c('firstevent', 'timeto', outcomes, vaps, confounders)], 20)
+head(impdfs[[1]][,c('firstevent', 'timeto', outcomes, vaps, confounders)], 20)
+```
+
+# Reshape data to person-period format
+
+```{r reshape-data}
+dataLongit <- function(df, outc){
+  
+  out <- list()
+  
+  for(i in outc){
+    out[[i]] <- dataLongSubDist(dataShort = df, timeColumn = "timeto", eventColumns = outc, eventFocus=i)
+    out[[i]]$overallweights <- out[[i]]$subDistWeights * out[[i]]$weights
+    out[[i]] <- out[[i]][!out[[i]]$subDistWeights %in% 0,]
+  }
+  
+  return(out)
+}
+
+subdfLong <- dataLongit(subdf_cc, outcomes)
+impdfsLong <- lapply(impdfs, dataLongit, outcomes)
+
+subdfLong_ecig_collapsed <- dataLongit(subdf_cc, outcomes_ecig_collapsed)
+impdfsLong_ecig_collapsed <- lapply(impdfs, dataLongit, outcomes_ecig_collapsed)
+
+rm(dataLongit)
+```
+
+# Specify survey designs
+
+```{r svy-designs}
+svydes_imp <- lapply(impdfsLong, function(data) lapply(data, function(x) svydesign(id = ~1, weights = ~overallweights, data = x)))
+
+svydes_imp_ecig_collapsed <- lapply(impdfsLong_ecig_collapsed, function(data) lapply(data, function(x) svydesign(id = ~1, weights = ~overallweights, data = x)))
+```
+
+# Get model equations
+
+```{r specify-models}
+alist <- list(
+    cc = setNames(vector(mode='list', length=length(outcomes)),outcomes),
+    imp = setNames(vector(mode='list', length=length(outcomes)),outcomes),
+    imp_w = setNames(vector(mode='list', length=length(outcomes)),outcomes)
+  )
+
+alist_ecig_collapsed <- list(
+    cc = setNames(vector(mode='list', length=length(outcomes_ecig_collapsed)),outcomes_ecig_collapsed),
+    imp = setNames(vector(mode='list', length=length(outcomes_ecig_collapsed)),outcomes_ecig_collapsed),
+    imp_w = setNames(vector(mode='list', length=length(outcomes_ecig_collapsed)),outcomes_ecig_collapsed)
+  )
+
+modeqs <- list(
+    'baseline' = paste0('y ~ timeInt + ', paste0(confounders, collapse = ' + ')),
+    'bmi_18_gr' = paste0('y ~ timeInt + ', paste0(c(confounders,'bmi_18_gr'), collapse = ' + ')),
+    'exerc_18' = paste0('y ~ timeInt + ', paste0(c(confounders,'exerc_18'), collapse = ' + ')),
+    'qual_20' = paste0('y ~ timeInt + ', paste0(c(confounders,'qual_20'), collapse = ' + ')),
+    'bingalc_20' = paste0('y ~ timeInt + ', paste0(c(confounders,'bingalc_20'), collapse = ' + ')),
+    'cana_20' = paste0('y ~ timeInt + ', paste0(c(confounders,'cana_20'), collapse = ' + ')),
+    'drug_20' = paste0('y ~ timeInt + ', paste0(c(confounders,'drug_20'), collapse = ' + ')),
+    'friends_smk_20' = paste0('y ~ timeInt + ', paste0(c(confounders, 'friends_smk_20'), collapse = ' + ')),
+    'mfq_21_gr' = paste0('y ~ timeInt + ', paste0(c(confounders,'mfq_21_gr'), collapse = ' + ')),
+    'townsend_21_gr' = paste0('y ~ timeInt + ', paste0(c(confounders,'townsend_21_gr'), collapse = ' + ')),
+    'parent_21' = paste0('y ~ timeInt + ', paste0(c(confounders,'parent_21'), collapse = ' + ')),
+    'freqsmk_21' = paste0('y ~ timeInt + ', paste0(c(confounders,'freqsmk_21'), collapse = ' + '))
+  )
+```
+
+# Fit full models
+
+```{r full-models, warning=FALSE}
+fitmodels <- function(output_list, outc, df_cc, df_imp, des){
+  
+  out <- output_list
+  
+  for(i in c('cc','imp','imp_w')){
+    
+    for(j in outc){
+      
+      if(i %in% 'cc'){
+        out[[i]][[j]] <- lapply(modeqs, function(x) 
+          glm(formula=formula(x), family=binomial(link = "cloglog"), data=df_cc[[j]]))
+        
+        } else if(i %in% 'imp'){
+          out[[i]][[j]] <- lapply(modeqs, function(x) lapply(1:100, function(n) 
+            glm(formula=formula(x), family=binomial(link = "cloglog"), data = df_imp[[n]][[j]])))
+          out[[i]][[j]] <- lapply(out[[i]][[j]], as.mira)
+          
+        } else if(i %in% 'imp_w'){          
+          out[[i]][[j]] <- lapply(modeqs, function(x) lapply(1:100, function(n) 
+            svyglm(formula=formula(x), family=binomial(link = "cloglog"), data = df_imp[[n]][[j]], 
+                   design=des[[n]][[j]])))
+          out[[i]][[j]] <- lapply(out[[i]][[j]], as.mira)
+          
+          }}}
+  
+  return(out)
+}
+
+models <- fitmodels(alist, outcomes, subdfLong, impdfsLong, svydes_imp)
+
+models_ecig_collapsed <- fitmodels(alist_ecig_collapsed, outcomes_ecig_collapsed, subdfLong_ecig_collapsed, impdfsLong_ecig_collapsed, svydes_imp_ecig_collapsed)
+
+rm(fitmodels)
+```
+
+# Produce tables
+
+```{r produce-tables, warning = FALSE}
+tblit <- function(output_list, outc, models_obj){
+  
+  out <- output_list
+  
+  for(i in c('cc','imp','imp_w')){
+    
+    for(j in outc){
+      
+      out[[i]][[j]]$baseline <- tbl_regression(models_obj[[i]][[j]]$baseline, 
+                                               exponentiate = T, quiet = T) %>% 
+        bold_labels() %>% italicize_levels()
+      
+      for(k in main_exp){
+        out[[i]][[j]][[k]] <- tbl_regression(models_obj[[i]][[j]][[k]], include = k, 
+                                             exponentiate = T, quiet = T) %>% 
+          bold_labels() %>% italicize_levels()
+      }}}
+  
+  return(out)
+}
+#Warning messages: In eval(family$initialize) : non-integer #successes in a binomial glm!
+
+tables <- tblit(alist, outcomes, models)
+
+tables_ecig_collapsed <- tblit(alist_ecig_collapsed, outcomes_ecig_collapsed, models_ecig_collapsed)
+
+rm(tblit)
+```
+
+# Group tables
+
+```{r group-tables}
+tblcomb <- function(ecig_collapsed){
+  
+  l <- setNames(vector(mode='list', length=length(c('baseline',main_exp))),c('baseline',main_exp))
+  outtabs <- list(cc = l, imp = l, imp_w = l)
+  
+  for(i in c('cc','imp','imp_w')){
+    
+    for(j in c('baseline',main_exp)){
+      
+      if(ecig_collapsed == F){
+        outtabs[[i]][[j]] <- tbl_merge(list(tables[[i]]$nonuse[[j]],
+                                            tables[[i]]$exclecig[[j]],
+                                            tables[[i]]$dual[[j]]
+                                            ), tab_spanner = paste0('**',outcomes_labs,'**'))
+        
+      } else if(ecig_collapsed == T){
+        outtabs[[i]][[j]] <- tbl_merge(list(tables_ecig_collapsed[[i]]$nonuse[[j]],
+                                            tables_ecig_collapsed[[i]]$ecig[[j]]
+                                            ), tab_spanner = paste0('**',outcomes_labs_ecig_collapsed,'**'))
+      }}
+    
+    outtabs[[i]] <- tbl_stack(outtabs[[i]])
+    
+  }
+  
+  return(outtabs)
+}
+
+outtabs <- tblcomb(ecig_collapsed = F)
+
+outtabs_ecig_collapsed <- tblcomb(ecig_collapsed = T)
+
+rm(tblcomb)
+```
+
+# Sort data for figures
+
+```{r sort-figdat}
+getfigdat <- function(tab){
+  out <- data.frame(
+  'var' = tab$table_body$variable,
+  'var_label' = tab$table_body$var_label,
+  'label' = tab$table_body$label,
+  'HR' = tab$table_body$estimate,
+  'LCI' = tab$table_body$conf.low,
+  'UCI' = tab$table_body$conf.high,
+  'ref' = tab$table_body$reference_row,
+  'header' = tab$table_body$header_row)
+  out[,c('HR','LCI','UCI')] <- sapply(out[,c('HR','LCI','UCI')], round, digits = 3)
+  out <- out[out$header %in% F,]
+  out$fill <- ifelse(out$LCI < 1 & out$UCI > 1, F, T)
+  return(out)
+}
+
+multgetfigdat <- function(dat){
+  out <- do.call('rbind',dat)
+  out$var <- factor(out$var, levels=c(confounders, main_exp))
+  out$var_label <- factor(out$var_label, levels=tab_labs)
+  out$y <- interaction(out$var_label, out$label)
+  out$y <- factor(out$y, levels=unique(out$y))
+  rownames(out) <- NULL
+  return(out)
+}
+
+combineit <- function(ecig_collapsed){
+  
+  if(ecig_collapsed == F){
+    out <- alist
+    for(i in c('cc','imp','imp_w')){
+      for(j in outcomes){
+        out[[i]][[j]] <- multgetfigdat(lapply(tables[[i]][[j]], getfigdat))
+      }}}
+  
+  else if(ecig_collapsed == T){
+    out <- alist_ecig_collapsed
+    for(i in c('cc','imp','imp_w')){
+      for(j in outcomes_ecig_collapsed){
+        out[[i]][[j]] <- multgetfigdat(lapply(tables_ecig_collapsed[[i]][[j]], getfigdat))      
+      }}}
+  
+  return(out)
+}
+figdat <- combineit(ecig_collapsed = F)
+figdat_ecig_collapsed <- combineit(ecig_collapsed = T)
+
+
+longfigdat <- function(df, df_ecig_collapsed){
+  
+  out <- do.call('rbind', df)
+  out_ecig_collapsed <- do.call('rbind', df_ecig_collapsed)
+  
+  out$outcome <- factor(rep(outcomes,
+                            sapply(df[outcomes], nrow)), 
+                        levels=outcomes, labels=outcomes_labs)
+  out_ecig_collapsed$outcome <- factor(rep(outcomes_ecig_collapsed, 
+                                           sapply(df_ecig_collapsed[outcomes_ecig_collapsed], nrow)), 
+                                       levels=outcomes_ecig_collapsed, labels=outcomes_labs_ecig_collapsed)
+  
+  out$ecig_collapsed <- F
+  out_ecig_collapsed$ecig_collapsed <- T
+  
+  out <- rbind(out, out_ecig_collapsed)
+
+  return(out)
+}
+subdistfigdat <- lapply(c('cc','imp','imp_w'), function(x) longfigdat(figdat[[x]], figdat_ecig_collapsed[[x]]))
+names(subdistfigdat) <- c('cc','imp','imp_w')
+
+save(subdistfigdat, file='C:/path/to/user/outputs/folder/subdistfigdat_adj.rda')
+
+rm(getfigdat, multgetfigdat, combineit, longfigdat, alist, confounders, main_exp, vaps, tab_labs, outcomes, outcomes_labs)
+```
+
+# Tables
+
+## Complete cases
+
+### Unweighted
+
+```{r print-cc-tab}
+outtabs$cc
+outtabs$cc |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/path/to/user/outputs/folder/subdistsurv_cc_adj_tab.docx')
+
+outtabs_ecig_collapsed$cc
+outtabs_ecig_collapsed$cc |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/path/to/user/outputs/folder/subdistsurv_cc_adj_ecig_collapsed_tab.docx')
+```
+
+## Imputed
+
+### Unweighted
+
+```{r print-imp-tab}
+outtabs$imp
+outtabs$imp |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/path/to/user/outputs/folder/subdistsurv_imp_adj_tab.docx')
+
+outtabs_ecig_collapsed$imp
+outtabs_ecig_collapsed$imp |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/path/to/user/outputs/folder/subdistsurv_imp_adj_ecig_collapsed_tab.docx')
+```
+
+### Weighted
+
+```{r print-imp_w-tab}
+outtabs$imp_w
+outtabs$imp_w |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/path/to/user/outputs/folder/subdistsurv_imp_adj_w_tab.docx')
+
+outtabs_ecig_collapsed$imp_w
+outtabs_ecig_collapsed$imp_w |> 
+  as_gt() |> 
+  gt::gtsave(filename = 'C:/path/to/user/outputs/folder/subdistsurv_imp_adj_w_ecig_collapsed_tab.docx')
+```

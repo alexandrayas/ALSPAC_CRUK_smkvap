@@ -1,1 +1,9 @@
+In order to replicate this analysis, the scripts contained in this repository should be followed in numbered order.
 
+Please note that, due to confidentiality reasons, file paths have been omitted. 
+
+In scripts 1-2, the file path "\\path\to\alspac\filestore\..." refers to where the ALSPAC data is stored. This will only be accessible to the ALSPAC team or a direct user. Data used in this project are available on request to the ALSPAC Executive Committee (alspac-exec@bristol.ac.uk) and subject to a data access fee. 
+
+In scripts 1-10, the file path "//path/to/ieu/project/folder/working/data/vaping_transitions/..." refers to where the resulting ALSPAC datasets are stored. During the project these datasets were saved in a secure Research Data Storage Facility, housed and maintained at the University of Bristol.
+
+In scripts 7-10, the file path "C:/path/to/user/outputs/folder/..." refers to the first author's workplace documents folder where analysis outputs, not containing any data, were stored.  
