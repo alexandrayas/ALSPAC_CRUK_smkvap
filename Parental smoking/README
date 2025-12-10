@@ -1,1 +1,11 @@
+In order to replicate this analysis, the scripts contained in this repository should be followed in numbered order.
+Please note that, due to confidentiality reasons, file paths, account numbers, and usernames have been omitted. 
 
+The informed consent obtained from ALSPAC participants does not allow the data to be made available through any third party maintained public repository. 
+Full instructions for applying for data access can be found here: http://www.bristol.ac.uk/alspac/researchers/access/. 
+Data used in this project was accessed using syntax dated 14th March 2025. This means more participants may have withdrawn their consent since these analyses were carried out.
+
+In the script titled "1. measures", all variable names used in this project are listed at the start of the document. 
+
+Scripts beginning with "3." refer to the Stata do files and accompanying shell scripts used to run g-computation formula mediation analyses via the computational facilities of the Advanced Computing Research Centre, University of Bristol - http://www.bristol.ac.uk/acrc/.
+For analyses using multiply imputed data, the array job function was used to run analyses concurrently in each dataset.
