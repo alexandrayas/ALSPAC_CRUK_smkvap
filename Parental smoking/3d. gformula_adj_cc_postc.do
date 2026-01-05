@@ -1,5 +1,5 @@
 *Have to run due to error on HPC: command ChkIn is unrecognized r(199)
-do "/user/home/qg21962/ado/plus/c/chkin.ado"
+do "/user/home/username/ado/plus/c/chkin.ado"
 
 *Start log
 log using gformula_adj_cc_postc.log, replace
@@ -45,3 +45,4 @@ return list
 
 *End logging
 log close
+
