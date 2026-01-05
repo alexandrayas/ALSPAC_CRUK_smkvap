@@ -1,5 +1,5 @@
 *Have to run due to error on HPC: command ChkIn is unrecognized r(199)
-do "/user/home/qg21962/ado/plus/c/chkin.ado"
+do "/user/home/username/ado/plus/c/chkin.ado"
 
 *Set args 
 args impdata
@@ -53,3 +53,4 @@ return list
 
 *End logging
 log close
+
